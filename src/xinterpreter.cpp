@@ -18,7 +18,8 @@
 
 #include "pybind11/functional.h"
 
-#include "xeus-python/xinterpreter.hpp"
+#include "xeus_robot_config.hpp"
+#include "xinterpreter.hpp"
 
 namespace nl = nlohmann;
 

@@ -30,8 +30,6 @@
 
 #include "xinterpreter.hpp"
 
-#include "xpythonhome.hpp"
-
 #ifdef __GNUC__
 void handler(int sig)
 {
@@ -101,7 +99,6 @@ int main(int argc, char* argv[])
 #endif
 
     // Setting PYTHONHOME
-    xpyt::set_pythonhome();
     print_pythonhome();
 
     // Instanciating the Python interpreter
