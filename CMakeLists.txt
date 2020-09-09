@@ -86,7 +86,7 @@ set(XROBOT_SRC
     src/main.cpp
     src/xinterpreter.hpp
     src/xinterpreter.cpp
-    src/xeus_python_config.hpp
+    src/xeus_robot_config.hpp
 )
 
 # Targets and link
