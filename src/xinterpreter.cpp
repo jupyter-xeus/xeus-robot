@@ -59,7 +59,22 @@ namespace xrob
     {
         nl::json kernel_res;
 
-        py::module::import("robot");
+        // Import needed modules for compiling the test cases
+        py::module os = py::module::import("os");
+        py::module io = py::module::import("io");
+        py::module robot_api = py::module::import("robot.api");
+        py::module robot_parsers = py::module::import("robot.running.builder.parsers");
+        py::module robot_transformers = py::module::import("robot.running.builder.transformers");
+
+        // Compile current cell and populate the test suite
+        py::object model = robot_api.attr("get_model")(
+            io.attr("StringIO")(code),
+            "data_only"_a=py::bool_(false),
+            "curdir"_a=os.attr("getcwd")()
+        );
+        robot_parsers.attr("ErrorReporter")(code).attr("visit")(model);
+        robot_transformers.attr("SettingsBuilder")(m_test_suite, m_test_defaults).attr("visit")(model);
+        robot_transformers.attr("SuiteBuilder")(m_test_suite, m_test_defaults).attr("visit")(model);
 
         return kernel_res;
     }
