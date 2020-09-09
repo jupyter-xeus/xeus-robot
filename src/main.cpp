@@ -66,20 +66,6 @@ std::string extract_filename(int& argc, char* argv[])
     return res;
 }
 
-void print_pythonhome()
-{
-#if PY_MAJOR_VERSION == 2
-    char* mbstr = Py_GetPythonHome();
-#else
-    std::setlocale(LC_ALL, "en_US.utf8");
-    wchar_t* ph = Py_GetPythonHome();
-
-    char mbstr[1024];
-    std::wcstombs(mbstr, ph, 1024);
-#endif
-    std::clog << "PYTHONHOME set to " << mbstr << std::endl;
-}
-
 int main(int argc, char* argv[])
 {
     // If we are called from the Jupyter launcher, silence all logging. This
@@ -97,9 +83,6 @@ int main(int argc, char* argv[])
     std::clog << "registering handler for SIGSEGV" << std::endl;
     signal(SIGSEGV, handler);
 #endif
-
-    // Setting PYTHONHOME
-    print_pythonhome();
 
     // Instanciating the Python interpreter
     py::scoped_interpreter guard;

@@ -44,8 +44,10 @@ configure_file (
 # Dependencies
 # ============
 
+set(xeus_REQUIRED_VERSION 0.24.0)
 set(xeus_python_REQUIRED_VERSION 0.8.4)
 
+find_package(xeus ${xeus_python_REQUIRED_VERSION} REQUIRED)
 find_package(xeus-python ${xeus_python_REQUIRED_VERSION} REQUIRED)
 
 # Flags
@@ -165,7 +167,7 @@ set_target_properties(xrobot PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE
 )
 
-target_link_libraries(xrobot PRIVATE xeus-python)
+target_link_libraries(xrobot PRIVATE xeus xeus-python)
 
 if(CMAKE_DL_LIBS)
     target_link_libraries(xrobot PRIVATE ${CMAKE_DL_LIBS} util)

@@ -13,15 +13,15 @@
 
 #include "nlohmann/json.hpp"
 
-#include "xeus/xinterpreter.hpp"
-#include "xeus/xsystem.hpp"
-
 #include "pybind11/functional.h"
 
 #include "xeus_robot_config.hpp"
 #include "xinterpreter.hpp"
 
 namespace nl = nlohmann;
+
+namespace py = pybind11;
+using namespace pybind11::literals;
 
 namespace xrob
 {
@@ -37,6 +37,16 @@ namespace xrob
 
     void interpreter::configure_impl()
     {
+        py::gil_scoped_acquire acquire;
+
+        py::module os = py::module::import("os");
+        py::module model = py::module::import("robot.running.model");
+        py::module testsettings = py::module::import("robot.running.builder.testsettings");
+
+        m_test_suite = model.attr("TestSuite")("name"_a="xeus-robot", "source"_a=os.attr("getcwd")());
+        m_test_defaults = testsettings.attr("TestDefaults")(py::none());
+
+        // TODO call super configure impl
     }
 
     nl::json interpreter::execute_request_impl(int execution_count,
@@ -47,6 +57,9 @@ namespace xrob
                                                bool allow_stdin)
     {
         nl::json kernel_res;
+
+        py::module::import("robot");
+
         return kernel_res;
     }
 
