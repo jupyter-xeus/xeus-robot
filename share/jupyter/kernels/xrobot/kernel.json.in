@@ -1,0 +1,9 @@
+{
+  "display_name": "Robot Framework (xeus-robot)",
+  "argv": [
+      "@XROBOT_KERNELSPEC_PATH@xrobot",
+      "-f",
+      "{connection_file}"
+  ],
+  "language": "robotframework"
+}
