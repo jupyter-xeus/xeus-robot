@@ -39,6 +39,7 @@ namespace xrob
     {
         py::gil_scoped_acquire acquire;
 
+        // Import needed modules and initialize the test suite
         py::module os = py::module::import("os");
         py::module model = py::module::import("robot.running.model");
         py::module testsettings = py::module::import("robot.running.builder.testsettings");
