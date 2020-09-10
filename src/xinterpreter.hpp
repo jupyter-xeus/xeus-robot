@@ -54,7 +54,6 @@ namespace xrob
         nl::json internal_request_impl(const nl::json& content) override;
 
         py::object m_test_suite;
-        py::object m_test_defaults;
     };
 }
 
