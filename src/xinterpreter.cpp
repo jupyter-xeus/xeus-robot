@@ -104,7 +104,7 @@ with TemporaryDirectory() as path:
         nl::json pub_data;
         nl::json pub_metadata;
         pub_data["text/plain"] = text;
-        xpyt::interpreter::execute_request_impl(execution_count, pub_data, pub_metadata);
+        xpyt::interpreter::publish_execution_result(execution_count, pub_data, pub_metadata);
 
         kernel_res["status"] = "ok";
         return kernel_res;
