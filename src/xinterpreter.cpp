@@ -64,6 +64,9 @@ namespace xrob
     {
         nl::json kernel_res;
 
+        // Acquire GIL before executing code
+        py::gil_scoped_acquire acquire;
+
         // Import needed modules for compiling the test cases
         py::module os = py::module::import("os");
         py::module io = py::module::import("io");
