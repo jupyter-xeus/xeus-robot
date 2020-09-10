@@ -14,6 +14,9 @@
 #include "nlohmann/json.hpp"
 
 #include "pybind11/functional.h"
+#include "pybind11/eval.h"
+
+#include "xeus-python/xinterpreter.hpp"
 
 #include "xeus_robot_config.hpp"
 #include "xinterpreter.hpp"
@@ -37,6 +40,8 @@ namespace xrob
 
     void interpreter::configure_impl()
     {
+        xpyt::interpreter::configure_impl();
+
         py::gil_scoped_acquire acquire;
 
         // Import needed modules and initialize the test suite
@@ -76,6 +81,32 @@ namespace xrob
         robot_transformers.attr("SettingsBuilder")(m_test_suite, m_test_defaults).attr("visit")(model);
         robot_transformers.attr("SuiteBuilder")(m_test_suite, m_test_defaults).attr("visit")(model);
 
+        // TODO Strip keyword and variables duplicates
+
+        py::object stdout = io.attr("StringIO")();
+
+        // py::exec because the "with" keyword cannot be emulated with pybind11
+        py::dict scope = py::dict("test_suite"_a=m_test_suite, "stdout"_a=stdout);
+        py::exec(py::str(R"(
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as path:
+    result = test_suite.run(outputdir=path, stdout=stdout)
+)"), scope);
+
+        // TODO Remove executed tests
+
+        // Get execution result
+        py::object stats = scope["result"].attr("statistics").attr("total").attr("critical");
+        std::string text = std::string("Failed tests: ") + py::str(stats.attr("failed")).cast<std::string>() +
+            std::string("; Passed tests: ") + py::str(stats.attr("passed")).cast<std::string>() + std::string(";");
+
+        nl::json pub_data;
+        nl::json pub_metadata;
+        pub_data["text/plain"] = text;
+        xpyt::interpreter::execute_request_impl(execution_count, pub_data, pub_metadata);
+
+        kernel_res["status"] = "ok";
         return kernel_res;
     }
 

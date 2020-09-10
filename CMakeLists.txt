@@ -167,7 +167,7 @@ set_target_properties(xrobot PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE
 )
 
-target_link_libraries(xrobot PRIVATE xeus xeus-python)
+target_link_libraries(xrobot PRIVATE xeus-python xeus)
 
 if(CMAKE_DL_LIBS)
     target_link_libraries(xrobot PRIVATE ${CMAKE_DL_LIBS} util)
