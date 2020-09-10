@@ -51,8 +51,6 @@ namespace xrob
 
         m_test_suite = model.attr("TestSuite")("name"_a="xeus-robot", "source"_a=os.attr("getcwd")());
         m_test_defaults = testsettings.attr("TestDefaults")(py::none());
-
-        // TODO call super configure impl
     }
 
     nl::json interpreter::execute_request_impl(int execution_count,
