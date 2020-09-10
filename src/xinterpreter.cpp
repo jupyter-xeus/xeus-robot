@@ -97,7 +97,8 @@ with TemporaryDirectory() as path:
     result = test_suite.run(outputdir=path, stdout=stdout)
 )"), scope);
 
-        // TODO Remove executed tests
+        // Remove executed tests
+        m_test_suite.attr("tests").attr("_items") = py::list();
 
         // Get execution result
         py::object stats = scope["result"].attr("statistics").attr("total").attr("critical");
