@@ -44,13 +44,10 @@ namespace xrob
 
         py::gil_scoped_acquire acquire;
 
-        // Import needed modules and initialize the test suite
-        py::module os = py::module::import("os");
-        py::module model = py::module::import("robot.running.model");
-        py::module testsettings = py::module::import("robot.running.builder.testsettings");
+        // Initialize the test suite
+        py::module robot = py::module::import("robotframework_interpreter");
 
-        m_test_suite = model.attr("TestSuite")("name"_a="xeus-robot", "source"_a=os.attr("getcwd")());
-        m_test_defaults = testsettings.attr("TestDefaults")(py::none());
+        m_test_suite = robot.attr("init_suite")("name"_a="xeus-robot");
     }
 
     nl::json interpreter::execute_request_impl(int execution_count,
@@ -65,50 +62,22 @@ namespace xrob
         // Acquire GIL before executing code
         py::gil_scoped_acquire acquire;
 
-        // Import needed modules for compiling the test cases
-        py::module os = py::module::import("os");
-        py::module io = py::module::import("io");
-        py::module robot_api = py::module::import("robot.api");
-        py::module robot_parsers = py::module::import("robot.running.builder.parsers");
-        py::module robot_transformers = py::module::import("robot.running.builder.transformers");
-
-        // Compile current cell and populate the test suite
-        py::object model = robot_api.attr("get_model")(
-            io.attr("StringIO")(code),
-            "data_only"_a=py::bool_(false),
-            "curdir"_a=os.attr("getcwd")()
-        );
-        robot_parsers.attr("ErrorReporter")(code).attr("visit")(model);
-        robot_transformers.attr("SettingsBuilder")(m_test_suite, m_test_defaults).attr("visit")(model);
-        robot_transformers.attr("SuiteBuilder")(m_test_suite, m_test_defaults).attr("visit")(model);
-
-        // TODO Strip keyword and variables duplicates
-
-        py::object stdout = io.attr("StringIO")();
-
-        // py::exec because the "with" keyword cannot be emulated with pybind11
-        py::dict scope = py::dict("test_suite"_a=m_test_suite, "stdout"_a=stdout);
-        py::exec(py::str(R"(
-from tempfile import TemporaryDirectory
-
-with TemporaryDirectory() as path:
-    result = test_suite.run(outputdir=path, stdout=stdout)
-)"), scope);
-
-        // Remove executed tests
-        m_test_suite.attr("tests").attr("_items") = py::list();
+        py::module robot = py::module::import("robotframework_interpreter");
 
         // Get execution result
-        py::object stats = scope["result"].attr("statistics").attr("total").attr("critical");
+        py::object result = robot.attr("execute")(code, m_test_suite);
+
+        py::object stats = result.attr("statistics").attr("total").attr("critical");
         std::string text = std::string("Failed tests: ") + py::str(stats.attr("failed")).cast<std::string>() +
             std::string("; Passed tests: ") + py::str(stats.attr("passed")).cast<std::string>() + std::string(";");
 
         nl::json pub_data;
-        nl::json pub_metadata;
         pub_data["text/plain"] = text;
-        xpyt::interpreter::publish_execution_result(execution_count, pub_data, pub_metadata);
+        xpyt::interpreter::publish_execution_result(execution_count, pub_data, nl::json::object());
 
         kernel_res["status"] = "ok";
+        kernel_res["user_expressions"] = nl::json::object();
+        kernel_res["payload"] = nl::json::array();
         return kernel_res;
     }
 
