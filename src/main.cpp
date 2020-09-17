@@ -29,6 +29,7 @@
 #include "pybind11/pybind11.h"
 
 #include "xinterpreter.hpp"
+#include "xdebugger.hpp"
 
 #ifdef __GNUC__
 void handler(int sig)
@@ -106,8 +107,8 @@ int main(int argc, char* argv[])
                              std::move(hist),
                              xeus::make_console_logger(xeus::xlogger::msg_type,
                                                        xeus::make_file_logger(xeus::xlogger::content, "xeus.log")),
-                             xeus::make_xserver_shell_main);
-                             // xpyt::make_python_debugger);
+                             xeus::make_xserver_shell_main,
+                             xrob::make_robot_debugger);
 
         std::clog <<
             "Starting xeus-robot kernel...\n\n"
