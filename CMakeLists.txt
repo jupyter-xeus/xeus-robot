@@ -55,7 +55,8 @@ find_package(xeus-python ${xeus_python_REQUIRED_VERSION} REQUIRED)
 
 include(CheckCXXCompilerFlag)
 
-set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+#set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 
 if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251 /wd4141")
@@ -89,6 +90,14 @@ set(XROBOT_SRC
     src/xinterpreter.hpp
     src/xinterpreter.cpp
     src/xeus_robot_config.hpp
+    src/xdebugger.hpp
+    src/xdebugger.cpp
+    src/xptvsd_client.hpp
+    src/xptvsd_client.cpp
+    src/xtraceback.hpp
+    src/xtraceback.cpp
+    src/xutils.hpp
+    src/xutils.cpp
 )
 
 # Targets and link
@@ -166,8 +175,8 @@ endif ()
 set_target_properties(xrobot PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE
 )
-
-target_link_libraries(xrobot PRIVATE xeus-python xeus)
+find_package(Threads)
+target_link_libraries(xrobot PRIVATE xeus-python xeus ${CMAKE_THREAD_LIBS_INIT})
 
 if(CMAKE_DL_LIBS)
     target_link_libraries(xrobot PRIVATE ${CMAKE_DL_LIBS} util)

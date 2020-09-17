@@ -20,6 +20,8 @@
 
 #include "xeus_robot_config.hpp"
 #include "xinterpreter.hpp"
+#include "xutils.hpp"
+#include "xtraceback.hpp"
 
 namespace nl = nlohmann;
 
@@ -48,7 +50,9 @@ namespace xrob
         py::module robot = py::module::import("robotframework_interpreter");
 
         m_test_suite = robot.attr("init_suite")("name"_a="xeus-robot");
-    }
+        m_listener = py::list();
+        m_debug_adapter = py::none();    
+}
 
     nl::json interpreter::execute_request_impl(int execution_count,
                                                const std::string& code,
@@ -63,6 +67,15 @@ namespace xrob
         py::gil_scoped_acquire acquire;
 
         py::module robot = py::module::import("robotframework_interpreter");
+
+        // Maps source file for debugger
+        {
+            std::string filename = get_cell_tmp_file(code);
+            py::dict tmp_scope = py::dict("test_suite"_a=m_test_suite, "filename"_a=filename);
+            py::exec(py::str(R"(
+test_suite.source=filename
+            )"), tmp_scope);
+        }
 
         // Get execution result
         py::object result = robot.attr("execute")(code, m_test_suite);
@@ -145,6 +158,46 @@ namespace xrob
 
     nl::json interpreter::internal_request_impl(const nl::json& content)
     {
+        py::gil_scoped_acquire acquire;
+        std::string port = content.value("port", "");
+        std::string code = content.value("code", "");
+        nl::json reply;
+        try
+        {
+            std::cout << code << std::endl;
+            py::dict scope = py::dict();
+            py::exec(py::str(code), py::globals()/*, scope*/);
+
+            py::exec(py::str(R"(
+listener=[]
+listener.append(get_listener())
+            )")
+            , py::globals()/*, scope*/);
+
+            m_listener = py::globals()["listener"];
+            m_debug_adapter = py::globals()["processor"];
+
+            reply["status"] = "ok";
+        }
+        catch (py::error_already_set& e)
+        {
+            std::cout << "exception" << std::endl;
+            xerror error = extract_error(e);
+
+            std::cout << error.m_ename << std::endl;
+            std::cout << error.m_evalue << std::endl;
+
+            publish_execution_error(error.m_ename, error.m_evalue, error.m_traceback);
+            error.m_traceback.resize(1);
+            error.m_traceback[0] = code;
+
+            reply["status"] = "error";
+            reply["ename"] = error.m_ename;
+            reply["evalue"] = error.m_evalue;
+            reply["traceback"] = error.m_traceback;
+            std::exit(-1);
+        }
+        return reply;
     }
 
 }
