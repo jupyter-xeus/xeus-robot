@@ -83,12 +83,10 @@ namespace xrob
         {
             std::string header_buffer = header.dump();
             zmq::message_t raw_header(header_buffer.c_str(), header_buffer.length());
-            std::cout << "DEBUGGER - sending header " << std::endl;
             m_ptvsd_header.send(raw_header, zmq::send_flags::none);
             // client responds with ACK message
             (void)m_ptvsd_header.recv(raw_header);
 
-            std::cout << "DEBUGGER - Debug command: " << message["command"] << std::endl;
             if(message["command"] == "dumpCell")
             {
                 reply = dump_cell_request(message);
@@ -134,9 +132,7 @@ namespace xrob
 
     nl::json debugger::forward_message(const nl::json& message)
     {
-        std::cout << "DEBUGGER - forwarding message:" << std::endl;
         std::string content = message.dump();
-        std::cout << content << std::endl;
         size_t content_length = content.length();
         std::string buffer = xptvsd_client::HEADER
                            + std::to_string(content_length)
@@ -377,11 +373,9 @@ namespace xrob
                            controller_header_end_point);
         client.detach();
 
-        std::cout << "Sending REQ to TCP client" << std::endl;
         m_ptvsd_socket.send(zmq::message_t("REQ", 3), zmq::send_flags::none);
         zmq::message_t ack;
         (void)m_ptvsd_socket.recv(ack);
-        std::cout << "Receivec ACK from TCP client" << std::endl;
 
         m_is_started = true;
 
@@ -415,7 +409,6 @@ def get_listener():
         nl::json json_code;
         json_code["port"] = m_ptvsd_port;
         json_code["code"] = code;
-        std::cout << "sending the code to start the robot debugger" << std::endl;
         nl::json rep = xdebugger::get_control_messenger().send_to_shell(json_code);
         std::string status = rep["status"].get<std::string>();
         if(status != "ok")
@@ -430,7 +423,6 @@ def get_listener():
             }
             std::clog << ename << " - " << evalue << std::endl;
         }
-        std::cout << "PTVSD - server started" << std::endl;
     }
 
     void debugger::stop()

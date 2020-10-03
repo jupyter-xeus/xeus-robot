@@ -73,40 +73,31 @@ namespace xrob
         {
             zmq::message_t mess;
             (void)m_ptvsd_socket.recv(m_socket_id);
-            std::cout << "PTVSD - received size = " << m_socket_id.size() << std::endl;
-            std::cout << "PTVSD - received: " << std::string(m_socket_id.data<const char>(), m_socket_id.size()) << std::endl;
             (void)m_ptvsd_socket.recv(mess);
-            std::cout << "PTVSD - received size = " << mess.size() << std::endl;
-            std::cout << "PTVSD - received: " << std::string(mess.data<const char>(), mess.size()) << std::endl;
             //m_ptvsd_socket.send(zmq::message_t(m_socket_id.data<const char>(), m_socket_id.size()), zmq::send_flags::none);
         }
         m_request_stop = false;
-        std::cout << "PTVSD - start polling" << std::endl;
         while(!m_request_stop)
         {
             zmq::poll(&items[0], 3, -1);
 
             if(items[0].revents & ZMQ_POLLIN)
             {
-                std::cout << "PTVSD - Received msg on header socket" << std::endl;
                 handle_header_socket();
             }
 
             if(items[1].revents & ZMQ_POLLIN)
             {
-                std::cout << "PTVSD - Received msg on control socket" << std::endl;
                 handle_control_socket();
             }
 
             if(items[2].revents & ZMQ_POLLIN)
             {
-                std::cout << "PTVSD - Received msg on DAP socket" << std::endl;
                 handle_ptvsd_socket(m_message_queue);
             }
 
             process_message_queue();
         }
-        std::cout << "PTVSD - exiting" << std::endl;
 
         m_ptvsd_socket.unbind(ptvsd_end_point);
         m_controller.disconnect(controller_end_point);
@@ -118,21 +109,17 @@ namespace xrob
 
     void xptvsd_client::process_message_queue()
     {
-        std::cout << "PTVSD - Processing message queue" << std::endl;
         while(!m_message_queue.empty())
         {
             const std::string& raw_message = m_message_queue.front();
-            std::cout << raw_message << std::endl;
             nl::json message = nl::json::parse(raw_message);
             // message is either an event or a response
-            std::cout << "PTVSD - received " << message["type"] << " from DAP" << std::endl;
             if(message["type"] == "event")
             {
                 handle_event(std::move(message));
             }
             else
             {
-                std::cout << "command was " << message["command"] << std::endl;
                 if(message["command"] == "disconnect")
                 {
                     m_request_stop = true;
@@ -142,7 +129,6 @@ namespace xrob
             }
             m_message_queue.pop();
         }
-        std::cout << "PTVSD - Exiting processing message queue" << std::endl;
     }
 
     void xptvsd_client::handle_header_socket()
@@ -167,10 +153,8 @@ namespace xrob
 
         while(!messages_received)
         {
-            std::cout << "PTVSD - Processing message " << std::endl;
             while(header_pos == std::string::npos)
             {
-                std::cout << "PTVSD - Processing header" << std::endl;
                 append_tcp_message(buffer);
                 header_pos = buffer.find(HEADER, hint);
             }
@@ -178,7 +162,6 @@ namespace xrob
             separator_pos = buffer.find(SEPARATOR, header_pos + HEADER_LENGTH);
             while(separator_pos == std::string::npos)
             {
-                std::cout << "PTVSD - Processing separator" << std::endl;
                 hint = buffer.size();
                 append_tcp_message(buffer);
                 separator_pos = buffer.find(SEPARATOR, hint);
@@ -190,21 +173,17 @@ namespace xrob
             // The end of the buffer does not contain a full message
             while(buffer.size() - msg_pos < msg_size)
             {
-                std::cout << "PTVSD - Processing buffer" << std::endl;
                 append_tcp_message(buffer);
             }
 
             // The end of the buffer contains a full message
             if(buffer.size() - msg_pos == msg_size)
             {
-                std::cout << "PTVSD - Processing end of message" << std::endl;
                 message_queue.push(buffer.substr(msg_pos));
                 messages_received = true;
             }
             else
             {
-                std::cout << "PTVSD - Processing end of message" << std::endl;
-                std::cout << "PTVSD - Processing beginning of new message" << std::endl;
                 // The end of the buffer contains a full message
                 // and the beginning of a new one. We push the first
                 // one in the queue, and loop again to get the next
@@ -215,7 +194,6 @@ namespace xrob
                 separator_pos = std::string::npos;
             }
         }
-        std::cout << "PTVSD - Exiting processing message" << std::endl;
     }
 
     void xptvsd_client::handle_control_socket()
@@ -223,17 +201,10 @@ namespace xrob
         zmq::message_t message;
         (void)m_controller.recv(message);
 
-        //std::string to_send = std::string(message.data<const char>(), message.size()) + "\r\n";
-        //std::cout << "PTVSD - sending message to DAP:" << std::endl;
-        //std::cout << to_send << std::endl;
         // Sends a ZMQ header (required for stream socket) and forwards
         // the message
-        //m_ptvsd_socket.send(zmq::message_t(m_socket_id, m_id_size), zmq::send_flags::sndmore);
-        //m_ptvsd_socket.send(zmq::message_t(m_socket_id.data<const char>(), m_socket_id.size()), zmq::send_flags::sndmore);
         m_ptvsd_socket.send(m_socket_id, zmq::send_flags::sndmore);
         m_ptvsd_socket.send(message, zmq::send_flags::none);
-        //m_ptvsd_socket.send(zmq::message_t(to_send.c_str(), to_send.length()), zmq::send_flags::none);
-        std::cout << "PTVSD - Sent message to DAP" << std::endl;
     }
 
     void xptvsd_client::append_tcp_message(std::string& buffer)
@@ -241,13 +212,11 @@ namespace xrob
         // First message is a ZMQ header that we discard
         zmq::message_t header;
         (void)m_ptvsd_socket.recv(m_socket_id);
-        std::cout << "PTVSD - header = " << std::string(header.data<const char>(), header.size()) << std::endl;
 
         zmq::message_t content;
         (void)m_ptvsd_socket.recv(content);
 
         buffer += std::string(content.data<const char>(), content.size());
-        std::cout << "PTVSD - buffer = " << buffer << std::endl;
     }
 
     void xptvsd_client::handle_event(nl::json message)
