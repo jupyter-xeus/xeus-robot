@@ -41,6 +41,13 @@ configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels/xrobot/kernel.json"
 )
 
+# Build options
+# =============
+
+# Compilation options
+OPTION(XROB_DISABLE_ARCH_NATIVE "disable -march=native flag" OFF)
+OPTION(XROB_DISABLE_TUNE_GENERIC "disable -mtune=generic flag" OFF)
+
 # Dependencies
 # ============
 
@@ -67,9 +74,9 @@ endif ()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-parameter -Wextra -Wreorder")
-    if (XPYT_DISABLE_ARCH_NATIVE)
+    if (XROB_DISABLE_ARCH_NATIVE)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mtune=generic")
-    elseif (XPYT_DISABLE_TUNE_GENERIC)
+    elseif (XROB_DISABLE_TUNE_GENERIC)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     else ()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
