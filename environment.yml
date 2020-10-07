@@ -1,9 +1,5 @@
-name: xeus-python
+name: xeus-robot
 channels:
   - conda-forge
 dependencies:
-  - xeus-python=0.8.2
-  - jedi
-  - notebook
-  - ipywidgets>=7.4
-  - itkwidgets
+  - xeus-robot
