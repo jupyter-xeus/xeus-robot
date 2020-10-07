@@ -1,9 +1,8 @@
 # xeus-robot
 
-`xeus-robot` is a Jupyter kernel for [Robot Framework](https://robotframework.org/) based on the native
-implementation of the Jupyter protocol [xeus](https://github.com/jupyter-xeus/xeus).
+`xeus-robot` is a Jupyter kernel for [Robot Framework](https://robotframework.org/) based on the native implementation of the Jupyter protocol [xeus](https://github.com/jupyter-xeus/xeus).
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-robot/master?filepath=notebooks/xrobot.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-robot/master?urlpath=/lab/tree/notebooks/xrobot.ipynb)
 
 ## Installation
 
