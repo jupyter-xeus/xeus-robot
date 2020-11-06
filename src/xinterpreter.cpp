@@ -164,7 +164,6 @@ test_suite.source=filename
         nl::json reply;
         try
         {
-            std::cout << code << std::endl;
             py::dict scope = py::dict();
             py::exec(py::str(code), py::globals()/*, scope*/);
 
@@ -181,12 +180,7 @@ listener.append(get_listener())
         }
         catch (py::error_already_set& e)
         {
-            std::cout << "exception" << std::endl;
             xerror error = extract_error(e);
-
-            std::cout << error.m_ename << std::endl;
-            std::cout << error.m_evalue << std::endl;
-
             publish_execution_error(error.m_ename, error.m_evalue, error.m_traceback);
             error.m_traceback.resize(1);
             error.m_traceback[0] = code;
