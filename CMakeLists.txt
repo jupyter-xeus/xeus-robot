@@ -99,12 +99,8 @@ set(XROBOT_SRC
     src/xinterpreter.hpp
     src/xinterpreter.cpp
     src/xeus_robot_config.hpp
-    src/xdap_tcp_client.hpp
-    src/xdap_tcp_client.cpp
     src/xdebugger.hpp
     src/xdebugger.cpp
-    src/xdebugger_base.hpp
-    src/xdebugger_base.cpp
     src/xrobodebug_client.hpp
     src/xrobodebug_client.cpp
     src/xtraceback.hpp

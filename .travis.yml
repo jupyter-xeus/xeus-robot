@@ -46,7 +46,7 @@ install:
         conda install python=$PY_VERSION -c conda-forge;
       fi
     # Host dependencies
-    - conda install -c conda-forge xeus-python==0.8.5 xtl cmake cppzmq nlohmann_json pybind11 pybind11_json pip robotframework
+    - conda install -c conda-forge xeus-python==0.8.7 xtl cmake cppzmq nlohmann_json pybind11 pybind11_json pip robotframework
     - pip install robotframework-interpreter
     - pip install robotframework-lsp
     # Build dependencies

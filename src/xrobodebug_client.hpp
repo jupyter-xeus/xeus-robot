@@ -11,7 +11,7 @@
 #ifndef XROB_ROBODEBUG_CLIENT_HPP
 #define XROB_ROBODEBUG_CLIENT_HPP
 
-#include "xdap_tcp_client.hpp"
+#include "xeus/xdap_tcp_client.hpp"
 
 namespace xrob
 {
