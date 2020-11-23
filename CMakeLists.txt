@@ -51,8 +51,7 @@ OPTION(XROB_DISABLE_TUNE_GENERIC "disable -mtune=generic flag" OFF)
 # Dependencies
 # ============
 
-set(xeus_REQUIRED_VERSION 0.24.0)
-set(xeus_python_REQUIRED_VERSION 0.8.4)
+set(xeus_python_REQUIRED_VERSION 0.9.1)
 set(pybind11_json_REQUIRED_VERSION 0.2.2)
 
 find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)

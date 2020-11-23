@@ -95,6 +95,7 @@ int main(int argc, char* argv[])
     using history_manager_ptr = std::unique_ptr<xeus::xhistory_manager>;
     history_manager_ptr hist = xeus::make_in_memory_history_manager();
 
+    nl::json debugger_config = nl::json::object();
     std::string connection_filename = extract_filename(argc, argv);
 
     if (!connection_filename.empty())
@@ -108,7 +109,8 @@ int main(int argc, char* argv[])
                              xeus::make_console_logger(xeus::xlogger::msg_type,
                                                        xeus::make_file_logger(xeus::xlogger::content, "xeus.log")),
                              xeus::make_xserver_shell_main,
-                             xrob::make_robot_debugger);
+                             xrob::make_robot_debugger,
+                             debugger_config);
 
         std::clog <<
             "Starting xeus-robot kernel...\n\n"

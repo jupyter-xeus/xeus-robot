@@ -32,7 +32,8 @@ namespace xrob
         debugger(zmq::context_t& context,
                  const xeus::xconfiguration& config,
                  const std::string& user_name,
-                 const std::string& session_id);
+                 const std::string& session_id,
+                 const nl::json& debugger_config);
 
         virtual ~debugger();
 
@@ -50,12 +51,14 @@ namespace xrob
         xrobodebug_client* p_robodebug_client;
         std::string m_robodebug_host;
         std::string m_robodebug_port;
+        nl::json m_debugger_config;
     };
 
     std::unique_ptr<xeus::xdebugger> make_robot_debugger(zmq::context_t& context,
                                                          const xeus::xconfiguration& config,
                                                          const std::string& user_name,
-                                                         const std::string& session_id);
+                                                         const std::string& session_id,
+                                                         const nl::json& debugger_config);
 }
 
 #endif
