@@ -42,7 +42,8 @@ namespace xrob
     debugger::debugger(zmq::context_t& context,
                        const xeus::xconfiguration& config,
                        const std::string& user_name,
-                       const std::string& session_id)
+                       const std::string& session_id,
+                       const nl::json& debugger_config)
         : xdebugger_base(context)
         , p_robodebug_client(new xrobodebug_client(context,
                                                    config,
@@ -55,6 +56,7 @@ namespace xrob
 
         , m_robodebug_host("127.0.0.1")
         , m_robodebug_port("")
+        , m_debugger_config(debugger_config)
     {
         register_request_handler("inspectVariables", std::bind(&debugger::inspect_variables_request, this, _1), false);
         m_robodebug_port = xeus::find_free_port(100, 5678, 5900);
@@ -198,9 +200,10 @@ def get_listener():
     std::unique_ptr<xeus::xdebugger> make_robot_debugger(zmq::context_t& context,
                                                           const xeus::xconfiguration& config,
                                                           const std::string& user_name,
-                                                          const std::string& session_id)
+                                                          const std::string& session_id,
+                                                          const nl::json& debugger_config)
     {
-        return std::unique_ptr<xeus::xdebugger>(new debugger(context, config, user_name, session_id));
+        return std::unique_ptr<xeus::xdebugger>(new debugger(context, config, user_name, session_id, debugger_config));
     }
 }
 
