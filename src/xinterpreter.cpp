@@ -51,15 +51,15 @@ namespace xrob
 
         m_test_suite = robot.attr("init_suite")("name"_a="xeus-robot");
         m_listener = py::list();
-        m_debug_adapter = py::none();    
+        m_debug_adapter = py::none();
 }
 
     nl::json interpreter::execute_request_impl(int execution_count,
                                                const std::string& code,
-                                               bool silent,
+                                               bool /*silent*/,
                                                bool /*store_history*/,
                                                nl::json /*user_expressions*/,
-                                               bool allow_stdin)
+                                               bool /*allow_stdin*/)
     {
         nl::json kernel_res;
 
@@ -69,13 +69,9 @@ namespace xrob
         py::module robot = py::module::import("robotframework_interpreter");
 
         // Maps source file for debugger
-        {
-            std::string filename = get_cell_tmp_file(code);
-            py::dict tmp_scope = py::dict("test_suite"_a=m_test_suite, "filename"_a=filename);
-            py::exec(py::str(R"(
-test_suite.source=filename
-            )"), tmp_scope);
-        }
+        std::string filename = get_cell_tmp_file(code);
+        py::dict tmp_scope = py::dict("test_suite"_a=m_test_suite, "filename"_a=filename);
+        py::exec("test_suite.source = filename", tmp_scope);
 
         // Get execution result
         py::object result = robot.attr("execute")(code, m_test_suite);
@@ -95,22 +91,22 @@ test_suite.source=filename
     }
 
     nl::json interpreter::complete_request_impl(
-        const std::string& code,
-        int cursor_pos)
+        const std::string& /*code*/,
+        int /*cursor_pos*/)
     {
         nl::json kernel_res;
         return kernel_res;
     }
 
-    nl::json interpreter::inspect_request_impl(const std::string& code,
-                                               int cursor_pos,
+    nl::json interpreter::inspect_request_impl(const std::string& /*code*/,
+                                               int /*cursor_pos*/,
                                                int /*detail_level*/)
     {
         nl::json kernel_res;
         return kernel_res;
     }
 
-    nl::json interpreter::is_complete_request_impl(const std::string& code)
+    nl::json interpreter::is_complete_request_impl(const std::string& /*code*/)
     {
         nl::json kernel_res;
         return kernel_res;
