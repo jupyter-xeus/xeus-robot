@@ -5,6 +5,7 @@
       "-f",
       "{connection_file}"
   ],
+  "codemirror_mode": "robotframework",
   "language": "robotframework",
   "metadata": { "debugger": true }
 }
