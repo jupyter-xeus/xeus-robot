@@ -28,6 +28,7 @@
 #include "pybind11/embed.h"
 #include "pybind11/pybind11.h"
 
+#include "xpythonhome.hpp"
 #include "xinterpreter.hpp"
 #include "xdebugger.hpp"
 
@@ -67,6 +68,17 @@ std::string extract_filename(int& argc, char* argv[])
     return res;
 }
 
+void print_pythonhome()
+{
+    std::setlocale(LC_ALL, "en_US.utf8");
+    wchar_t* ph = Py_GetPythonHome();
+
+    char mbstr[1024];
+    std::wcstombs(mbstr, ph, 1024);
+
+    std::clog << "PYTHONHOME set to " << mbstr << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
     // If we are called from the Jupyter launcher, silence all logging. This
@@ -84,6 +96,20 @@ int main(int argc, char* argv[])
     std::clog << "registering handler for SIGSEGV" << std::endl;
     signal(SIGSEGV, handler);
 #endif
+
+    // Setting Program Name
+    static const std::string executable(XEUS_PYTHON_EXECUTABLE);
+    static const std::wstring wexecutable(executable.cbegin(), executable.cend());
+
+    // On windows, sys.executable is not properly set with Py_SetProgramName
+    // Cf. https://bugs.python.org/issue34725
+    // A private undocumented API was added as a workaround in Python 3.7.2.
+    // _Py_SetProgramFullPath(const_cast<wchar_t*>(wexecutable.c_str()));
+    Py_SetProgramName(const_cast<wchar_t*>(wexecutable.c_str()));
+
+    // Setting PYTHONHOME
+    xrob::set_pythonhome();
+    print_pythonhome();
 
     // Instanciating the Python interpreter
     py::scoped_interpreter guard;

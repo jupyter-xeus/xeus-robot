@@ -97,6 +97,10 @@ set(XROBOT_SRC
     src/main.cpp
     src/xinterpreter.hpp
     src/xinterpreter.cpp
+    src/xpaths.hpp
+    src/xpaths.cpp
+    src/xpythonhome.hpp
+    src/xpythonhome.cpp
     src/xeus_robot_config.hpp
     src/xdebugger.hpp
     src/xdebugger.cpp
@@ -121,6 +125,12 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib; ${CMAKE_INSTALL_PREFIX}/${
 # ======
 add_executable(xrobot ${XROBOT_SRC})
 target_link_libraries(xrobot PRIVATE pybind11::embed)
+
+if (XEUS_PYTHONHOME_RELPATH)
+    target_compile_definitions(xrobot PRIVATE XEUS_PYTHONHOME_RELPATH=${XEUS_PYTHONHOME_RELPATH})
+endif()
+
+target_compile_definitions(xrobot PRIVATE XEUS_PYTHON_EXECUTABLE="${PYTHON_EXECUTABLE}")
 
 if (MSVC)
     target_compile_options(xrobot PUBLIC /wd4251 /wd4141)
