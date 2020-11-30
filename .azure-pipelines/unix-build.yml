@@ -20,9 +20,6 @@ steps:
 
   - script: |
       source activate xeus-robot
-      pip install example_magic
-      pip install robotframework-interpreter
-      pip install robotframework-lsp
       mkdir build
       cd build
       # The xeus conda package is built with CMAKE_CXX_STANDARD=17
@@ -42,3 +39,9 @@ steps:
       ./test_xeus_robot
     displayName: Test xeus-robot
     workingDirectory: $(Build.BinariesDirectory)/build/test
+
+  - script: |
+      source activate xeus-robot
+      pytest test_xrobot_kernel.py
+    displayName: Run jupyter kernel test
+    workingDirectory: $(Build.SourcesDirectory)/test
