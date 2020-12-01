@@ -42,4 +42,5 @@ install:
 
 build_script:
   - cd ../test
+  - set XEUS_LOG=1
   - py.test . -vvv
