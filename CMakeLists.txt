@@ -48,6 +48,10 @@ configure_file (
 OPTION(XROB_DISABLE_ARCH_NATIVE "disable -march=native flag" OFF)
 OPTION(XROB_DISABLE_TUNE_GENERIC "disable -mtune=generic flag" OFF)
 
+# Test options
+OPTION(XROB_BUILD_TESTS "xeus-robot test suite" OFF)
+OPTION(XROB_DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
+
 # Dependencies
 # ============
 
@@ -198,6 +202,17 @@ target_link_libraries(xrobot PRIVATE xeus-python xeus ${CMAKE_THREAD_LIBS_INIT})
 
 if(CMAKE_DL_LIBS)
     target_link_libraries(xrobot PRIVATE ${CMAKE_DL_LIBS} util)
+endif()
+
+# Tests
+# =====
+
+if(XROB_DOWNLOAD_GTEST OR XROB_GTEST_SRC_DIR)
+    set(XROB_BUILD_TESTS ON)
+endif()
+
+if(XROB_BUILD_TESTS)
+    add_subdirectory(test)
 endif()
 
 # Installation
