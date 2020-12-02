@@ -28,7 +28,7 @@ install:
   - conda info -a
   # Host dependencies
   - conda install python=3.7 # ptvsd is not available on python 3.8 for windows
-  - conda install -c conda-forge xeus-python==0.9.1 xtl cmake cppzmq nlohmann_json pybind11 pybind11_json pip robotframework
+  - conda install -c conda-forge xeus-python==0.9.1 xtl cmake cppzmq nlohmann_json pybind11 pybind11_json pip robotframework gtest=1.8.0
   - pip install robotframework-interpreter
   - pip install robotframework-lsp
   # Build dependencies
@@ -36,7 +36,7 @@ install:
   # Build and install xeus-python
   - mkdir build
   - cd build
-  - cmake -G "NMake Makefiles" -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\Library -D XEXTRA_JUPYTER_DATA_DIR=%MINICONDA%\\share\\jupyter -D XEUS_PYTHONHOME_RELPATH=..\\ ..
+  - cmake -G "NMake Makefiles" -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\Library -D XEXTRA_JUPYTER_DATA_DIR=%MINICONDA%\\share\\jupyter -D XROB_BUILD_TESTS=ON -D XEUS_PYTHONHOME_RELPATH=..\\ ..
   - nmake
   - nmake install
   # Install test dependencies
@@ -44,4 +44,5 @@ install:
   - pip install example_magic
 
 build_script:
-  - cd ../test
+  - cd test
+  - test_xeus_robot
