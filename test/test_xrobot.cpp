@@ -37,6 +37,14 @@ nl::json make_kernel_info_request()
     return req;
 }
 
+nl::json make_execute_request(const std::string& code)
+{
+    nl::json req = {
+        {"code", code},
+    };
+    return req;
+}
+
 namespace
 {
     const std::string KERNEL_JSON = "kernel-debug.json";
@@ -136,3 +144,58 @@ TEST(xrobot, kernel_info)
     }
 }
 
+TEST(xrobot, execute)
+{
+    start_kernel();
+    start_timer();
+    zmq::context_t context;
+    {
+        std::cout << "Instantiating client" << std::endl;
+        xeus_logger_client client(context, "xrobot_client", xeus::load_configuration(KERNEL_JSON), "kernel_info.log");
+
+        std::string code1 = R"(
+*** Settings ***
+
+Library  String
+
+*** Variables ***
+
+${VARNAME}  Coucou
+        )";
+
+        std::cout << "Sending execute_request" <<std::endl;
+        client.send_on_shell("execute_request", make_execute_request(code1));
+        nl::json res = client.receive_on_shell();
+        std::cout << "received: " << std::endl << res.dump(4) << std::endl;
+
+        std::string code2 = R"(
+*** Variables ***
+
+${VARNAME}  Hello World
+        )";
+        client.send_on_shell("execute_request", make_execute_request(code2));
+        nl::json res2 = client.receive_on_shell();
+        std::cout << "received: " << std::endl << res2.dump(4) << std::endl;
+
+        std::string code3 = R"(
+*** Test Cases ***
+
+Test variable name
+    ${LOWER} =  Convert To Lower Case    ${VARNAME}
+    Should Be Lowercase   ${LOWER}
+    Should start with  ${LOWER}  hello
+
+Test variable name should fail
+    Should start with  ${VARNAME}  Coucou
+        )";
+        client.send_on_shell("execute_request", make_execute_request(code2));
+        nl::json res3 = client.receive_on_shell();
+        std::cout << "received: " << std::endl << res3.dump(4) << std::endl;
+
+        client.send_on_control("shutdown_request", make_shutdown_request());
+        client.receive_on_control();
+
+        std::this_thread::sleep_for(2s);
+        notify_done();
+    }
+}
