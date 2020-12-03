@@ -97,7 +97,12 @@ void run_timer()
     std::unique_lock<std::mutex> lk(mcv);
     if (!cv.wait_for(lk, std::chrono::seconds(20), []() { return done; }))
     {
-        std::clog << "Unit test time out !!" << std::endl;
+        std::cout << "Unit test time out !!" << std::endl;
+#ifndef WIN32
+        std::string cmd = "killall xrobot";
+        int ret = std::system(cmd.c_str());
+        std::cout << "killall xrobot returned " << ret << std::endl;
+#endif
         std::terminate();
     }
 }
