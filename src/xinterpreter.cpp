@@ -13,6 +13,8 @@
 
 #include "nlohmann/json.hpp"
 
+#include "pybind11_json/pybind11_json.hpp"
+
 #include "pybind11/functional.h"
 #include "pybind11/eval.h"
 
@@ -47,12 +49,13 @@ namespace xrob
         py::gil_scoped_acquire acquire;
 
         // Initialize the test suite
-        py::module robot = py::module::import("robotframework_interpreter");
+        py::module robot_interpreter = py::module::import("robotframework_interpreter");
 
-        m_test_suite = robot.attr("init_suite")("name"_a="xeus-robot");
+        m_test_suite = robot_interpreter.attr("init_suite")("name"_a="xeus-robot");
+        m_keywords_listener = robot_interpreter.attr("RobotKeywordsIndexerListener")();
         m_listener = py::list();
         m_debug_adapter = py::none();
-}
+    }
 
     nl::json interpreter::execute_request_impl(int execution_count,
                                                const std::string& code,
@@ -66,7 +69,7 @@ namespace xrob
         // Acquire GIL before executing code
         py::gil_scoped_acquire acquire;
 
-        py::module robot = py::module::import("robotframework_interpreter");
+        py::module robot_interpreter = py::module::import("robotframework_interpreter");
 
         // Maps source file for debugger
         std::string filename = get_cell_tmp_file(code);
@@ -74,7 +77,9 @@ namespace xrob
         py::exec("test_suite.source = filename", tmp_scope);
 
         // Get execution result
-        py::object result = robot.attr("execute")(code, m_test_suite);
+        py::list listeners;
+        listeners.attr("append")(m_keywords_listener);
+        py::object result = robot_interpreter.attr("execute")(code, m_test_suite, "listeners"_a=listeners);
 
         py::object stats = result.attr("statistics").attr("total").attr("critical");
         std::string text = std::string("Failed tests: ") + py::str(stats.attr("failed")).cast<std::string>() +
@@ -91,11 +96,15 @@ namespace xrob
     }
 
     nl::json interpreter::complete_request_impl(
-        const std::string& /*code*/,
-        int /*cursor_pos*/)
+        const std::string& code,
+        int cursor_pos)
     {
-        nl::json kernel_res;
-        return kernel_res;
+        // Acquire GIL before executing code
+        py::gil_scoped_acquire acquire;
+
+        py::module robot_interpreter = py::module::import("robotframework_interpreter");
+
+        return robot_interpreter.attr("complete")(code, cursor_pos, m_test_suite, m_keywords_listener);
     }
 
     nl::json interpreter::inspect_request_impl(const std::string& /*code*/,

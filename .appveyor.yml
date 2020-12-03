@@ -28,7 +28,7 @@ install:
   - conda info -a
   # Host dependencies
   - conda install python=3.7 # ptvsd is not available on python 3.8 for windows
-  - conda install -c conda-forge xeus-python==0.9.1 xtl cmake cppzmq nlohmann_json pybind11 pybind11_json pip robotframework robotframework-interpreter robotframework-lsp gtest=1.8.0
+  - conda install -c conda-forge xeus-python==0.9.1 xtl cmake cppzmq nlohmann_json pybind11 pybind11_json pip robotframework robotframework-interpreter==0.2.0 robotframework-lsp gtest=1.8.0
   # Build dependencies
   - conda install cmake -c conda-forge
   # Install test dependencies

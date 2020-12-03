@@ -18,6 +18,15 @@ class XeusRobotTests(jupyter_kernel_test.KernelTests):
     kernel_name = "xrobot"
     language_name = "robotframework"
 
+    completion_samples = [
+        # Context completion
+        {'text': '***', 'matches': {'*** Tasks ***', '*** Keywords ***', '*** Settings ***', '*** Variables ***', '*** Test Cases ***'}},
+        # Library completion
+        {'text': '*** Settings ***\nLibrary S', 'matches': {'Screenshot', 'String'}},
+        # Variable completion
+        {'text': '*** Variables ***\n${VARNAME}  test\n${V', 'matches': {'${VARNAME}'}},
+    ]
+
 
 if __name__ == '__main__':
     unittest.main()
