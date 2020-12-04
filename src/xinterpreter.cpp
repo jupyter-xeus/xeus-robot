@@ -57,17 +57,32 @@ namespace xrob
         m_debug_adapter = py::none();
     }
 
-    nl::json interpreter::execute_request_impl(int execution_count,
-                                               const std::string& code,
-                                               bool /*silent*/,
-                                               bool /*store_history*/,
-                                               nl::json /*user_expressions*/,
-                                               bool /*allow_stdin*/)
+    nl::json interpreter::execute_request_impl(
+        int execution_count,
+        const std::string& code,
+        bool silent,
+        bool /*store_history*/,
+        nl::json /*user_expressions*/,
+        bool /*allow_stdin*/)
     {
-        nl::json kernel_res;
-
         // Acquire GIL before executing code
         py::gil_scoped_acquire acquire;
+
+        // If it's Python code
+        py::module re = py::module::import("re");
+        py::object match = re.attr("match")("^%%python module ([a-zA-Z_]+)", code);
+        if (!match.is_none())
+        {
+            py::object module_name = py::list(match.attr("groups")())[0];
+
+            // Extract Python code from the cell
+            std::string python_code = code;
+            python_code.erase(0, py::list(match.attr("span")())[1].cast<int>());
+
+            return execute_python(python_code, module_name, silent);
+        }
+
+        nl::json kernel_res;
 
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
 
@@ -92,6 +107,48 @@ namespace xrob
         kernel_res["status"] = "ok";
         kernel_res["user_expressions"] = nl::json::object();
         kernel_res["payload"] = nl::json::array();
+        return kernel_res;
+    }
+
+    nl::json interpreter::execute_python(
+        const std::string& code,
+        py::object module_name,
+        bool silent)
+    {
+        nl::json kernel_res;
+
+        py::module sys = py::module::import("sys");
+        py::module types = py::module::import("types");
+
+        // Create Python module
+        py::object module = types.attr("ModuleType")(module_name);
+
+        sys.attr("modules")[module_name] = module;
+
+        // Execute it
+        try
+        {
+            py::exec(code, module.attr("__dict__"));
+
+            kernel_res["status"] = "ok";
+            kernel_res["user_expressions"] = nl::json::object();
+            kernel_res["payload"] = nl::json::array();
+        }
+        catch (py::error_already_set& e)
+        {
+            xerror error = extract_error(e);
+
+            if (!silent)
+            {
+                publish_execution_error(error.m_ename, error.m_evalue, error.m_traceback);
+            }
+
+            kernel_res["status"] = "error";
+            kernel_res["ename"] = error.m_ename;
+            kernel_res["evalue"] = error.m_evalue;
+            kernel_res["traceback"] = error.m_traceback;
+        }
+
         return kernel_res;
     }
 
