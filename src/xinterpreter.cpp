@@ -159,6 +159,27 @@ namespace xrob
         // Acquire GIL before executing code
         py::gil_scoped_acquire acquire;
 
+        // If it's Python code
+        py::module re = py::module::import("re");
+        py::object match = re.attr("match")("^%%python module ([a-zA-Z_]+)", code);
+        if (!match.is_none())
+        {
+            py::object module_name = py::list(match.attr("groups")())[0];
+
+            // Extract Python code from the cell
+            std::string python_code = code;
+            int header_len = py::list(match.attr("span")())[1].cast<int>();
+            python_code.erase(0, header_len);
+
+            nl::json xpython_res = xpyt::interpreter::complete_request_impl(python_code, cursor_pos - header_len);
+
+            // Fix cursor pos in xpython's answer
+            xpython_res["cursor_start"] = xpython_res["cursor_start"].get<int>() + header_len;
+            xpython_res["cursor_end"] = xpython_res["cursor_end"].get<int>() + header_len;
+
+            return xpython_res;
+        }
+
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
 
         return robot_interpreter.attr("complete")(code, cursor_pos, m_test_suite, m_keywords_listener);

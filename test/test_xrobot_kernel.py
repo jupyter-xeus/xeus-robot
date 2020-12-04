@@ -25,6 +25,8 @@ class XeusRobotTests(jupyter_kernel_test.KernelTests):
         {'text': '*** Settings ***\nLibrary S', 'matches': {'Screenshot', 'String'}},
         # Variable completion
         {'text': '*** Variables ***\n${VARNAME}  test\n${V', 'matches': {'${VARNAME}'}},
+        # Python completion
+        {'text': '%%python module test\nfrom time import s', 'matches': {'sleep', 'strftime', 'strptime', 'struct_time'}},
     ]
 
 
