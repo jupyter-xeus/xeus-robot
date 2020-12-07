@@ -58,6 +58,7 @@ namespace xrob
         py::object m_test_suite;
         py::object m_keywords_listener;
         py::list m_listener;
+        py::list m_python_modules;
         py::object m_debug_adapter;
     };
 }

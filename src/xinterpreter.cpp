@@ -133,6 +133,9 @@ namespace xrob
             kernel_res["status"] = "ok";
             kernel_res["user_expressions"] = nl::json::object();
             kernel_res["payload"] = nl::json::array();
+
+            // Keep the Python module name around for library completion
+            m_python_modules.attr("append")(module_name);
         }
         catch (py::error_already_set& e)
         {
@@ -182,7 +185,7 @@ namespace xrob
 
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
 
-        return robot_interpreter.attr("complete")(code, cursor_pos, m_test_suite, m_keywords_listener);
+        return robot_interpreter.attr("complete")(code, cursor_pos, m_test_suite, m_keywords_listener, m_python_modules);
     }
 
     nl::json interpreter::inspect_request_impl(const std::string& /*code*/,
