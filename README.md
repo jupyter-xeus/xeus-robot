@@ -8,6 +8,12 @@
 
 ## Installation
 
+### Using conda
+
+```bash
+conda install -c conda-forge
+```
+
 ### Installing from source
 
 You can install `xeus-robot` from the sources, you first need to install its dependencies:
@@ -21,6 +27,12 @@ Then you can compile the sources:
 ```bash
 cmake -D CMAKE_INSTALL_PREFIX=$CONDA_PREFIX .
 make install -j6
+```
+
+### Install the syntax highlighting for JupyterLab 1 and 2
+
+```bash
+jupyter labextension install @marketsquare/jupyterlab_robotmode
 ```
 
 ## Dependencies
