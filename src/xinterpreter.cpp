@@ -90,9 +90,7 @@ namespace xrob
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
 
         // Maps source file for debugger
-        std::string filename = get_cell_tmp_file(code);
-        py::dict tmp_scope = py::dict("test_suite"_a=m_test_suite, "filename"_a=filename);
-        py::exec("test_suite.source = filename", tmp_scope);
+        m_test_suite.attr("source") = get_cell_tmp_file(code);
 
         // Get execution result
         py::list listeners;
@@ -267,15 +265,13 @@ listener.append(get_listener())
         catch (py::error_already_set& e)
         {
             xerror error = extract_error(e);
+
             publish_execution_error(error.m_ename, error.m_evalue, error.m_traceback);
-            error.m_traceback.resize(1);
-            error.m_traceback[0] = code;
 
             reply["status"] = "error";
             reply["ename"] = error.m_ename;
             reply["evalue"] = error.m_evalue;
             reply["traceback"] = error.m_traceback;
-            std::exit(-1);
         }
         return reply;
     }
