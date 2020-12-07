@@ -55,8 +55,24 @@ namespace xrob
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
 
         m_test_suite = robot_interpreter.attr("init_suite")("name"_a="xeus-robot");
+
+        // Initialize listeners
+        m_listeners = py::list();
+        m_drivers = py::list();
+        m_debug_listener = py::none();
+
         m_keywords_listener = robot_interpreter.attr("RobotKeywordsIndexerListener")();
-        m_listener = py::list();
+        m_listeners.append(m_keywords_listener);
+
+        m_return_value_listener = robot_interpreter.attr("ReturnValueListener")();
+        m_listeners.append(m_return_value_listener);
+
+        m_listeners.append(robot_interpreter.attr("RpaBrowserConnectionsListener")(m_drivers));
+        m_listeners.append(robot_interpreter.attr("SeleniumConnectionsListener")(m_drivers));
+        m_listeners.append(robot_interpreter.attr("JupyterConnectionsListener")(m_drivers));
+        m_listeners.append(robot_interpreter.attr("AppiumConnectionsListener")(m_drivers));
+        m_listeners.append(robot_interpreter.attr("WhiteLibraryListener")(m_drivers));
+
         m_debug_adapter = py::none();
     }
 
@@ -97,11 +113,9 @@ namespace xrob
 
         // Get execution result
         py::object result;
-        py::list listeners;
-        listeners.attr("append")(m_keywords_listener);
         try
         {
-            result = robot_interpreter.attr("execute")(code, m_test_suite, "listeners"_a=listeners);
+            result = robot_interpreter.attr("execute")(code, m_test_suite, "listeners"_a=m_listeners);
         }
         catch (py::error_already_set& e)
         {
@@ -121,13 +135,15 @@ namespace xrob
             return kernel_res;
         }
 
-        py::object stats = result.attr("statistics").attr("total").attr("critical");
-        std::string text = std::string("Failed tests: ") + py::str(stats.attr("failed")).cast<std::string>() +
-            std::string("; Passed tests: ") + py::str(stats.attr("passed")).cast<std::string>() + std::string(";");
+        py::object return_value = m_return_value_listener.attr("get_last_value")();
+        if (!return_value.is_none())
+        {
+            nl::json pub_data;
 
-        nl::json pub_data;
-        pub_data["text/plain"] = text;
-        xpyt::interpreter::publish_execution_result(execution_count, pub_data, nl::json::object());
+            pub_data = m_return_value_listener.attr("get_last_value")();
+
+            xpyt::interpreter::publish_execution_result(execution_count, pub_data, nl::json::object());
+        }
 
         kernel_res["status"] = "ok";
         kernel_res["user_expressions"] = nl::json::object();
@@ -166,6 +182,9 @@ namespace xrob
             kernel_res["status"] = "ok";
             kernel_res["user_expressions"] = nl::json::object();
             kernel_res["payload"] = nl::json::array();
+
+            // Keep the Python module name around for library completion
+            m_python_modules.attr("append")(modulename);
         }
         catch (py::error_already_set& e)
         {
@@ -215,7 +234,9 @@ namespace xrob
 
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
 
-        return robot_interpreter.attr("complete")(code, cursor_pos, m_test_suite, m_keywords_listener);
+        nl::json xrobot_res = robot_interpreter.attr("complete")(code, cursor_pos, m_test_suite, m_keywords_listener, m_python_modules, m_drivers);
+        xrobot_res["status"] = "ok";
+        return xrobot_res;
     }
 
     nl::json interpreter::inspect_request_impl(const std::string& /*code*/,
@@ -276,6 +297,13 @@ namespace xrob
 
     void interpreter::shutdown_request_impl()
     {
+        // Acquire GIL before executing code
+        py::gil_scoped_acquire acquire;
+
+        py::module robot_interpreter = py::module::import("robotframework_interpreter");
+
+        // Shutdown drivers
+        robot_interpreter.attr("shutdown_drivers")(m_drivers);
     }
 
     nl::json interpreter::internal_request_impl(const nl::json& content)
@@ -286,17 +314,23 @@ namespace xrob
         nl::json reply;
         try
         {
-            py::dict scope = py::dict();
-            exec(py::str(code), py::globals()/*, scope*/);
+            try
+            {
+                m_listeners.attr("remove")(m_debug_listener);
+            }
+            catch(py::error_already_set& e)
+            {
+                // Ignoring the exception if the element is not in the list
+            }
 
-            exec(py::str(R"(
-listener = []
-listener.append(get_listener())
-            )")
-            , py::globals()/*, scope*/);
+            py::dict scope;
 
-            m_listener = py::globals()["listener"];
-            m_debug_adapter = py::globals()["processor"];
+            exec(py::str(code), scope);
+
+            m_debug_listener = scope["debug_listener"];
+            m_debug_adapter = scope["processor"];
+
+            m_listeners.append(m_debug_listener);
 
             reply["status"] = "ok";
         }
