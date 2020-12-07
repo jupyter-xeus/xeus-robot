@@ -95,9 +95,30 @@ namespace xrob
         py::exec("test_suite.source = filename", tmp_scope);
 
         // Get execution result
+        py::object result;
         py::list listeners;
         listeners.attr("append")(m_keywords_listener);
-        py::object result = robot_interpreter.attr("execute")(code, m_test_suite, "listeners"_a=listeners);
+        try
+        {
+            result = robot_interpreter.attr("execute")(code, m_test_suite, "listeners"_a=listeners);
+        }
+        catch (py::error_already_set& e)
+        {
+            xerror error = extract_error(e);
+
+            std::vector<std::string> traceback({error.m_ename + ": " + error.m_evalue});
+            if (!silent)
+            {
+                publish_execution_error(error.m_ename, error.m_evalue, traceback);
+            }
+
+            kernel_res["status"] = "error";
+            kernel_res["ename"] = error.m_ename;
+            kernel_res["evalue"] = error.m_evalue;
+            kernel_res["traceback"] = traceback;
+
+            return kernel_res;
+        }
 
         py::object stats = result.attr("statistics").attr("total").attr("critical");
         std::string text = std::string("Failed tests: ") + py::str(stats.attr("failed")).cast<std::string>() +
@@ -131,7 +152,7 @@ namespace xrob
         // Execute it
         try
         {
-            py::exec(code, module.attr("__dict__"));
+            exec(py::str(code), module.attr("__dict__"));
 
             kernel_res["status"] = "ok";
             kernel_res["user_expressions"] = nl::json::object();
@@ -251,10 +272,10 @@ namespace xrob
         try
         {
             py::dict scope = py::dict();
-            py::exec(py::str(code), py::globals()/*, scope*/);
+            exec(py::str(code), py::globals()/*, scope*/);
 
-            py::exec(py::str(R"(
-listener=[]
+            exec(py::str(R"(
+listener = []
 listener.append(get_listener())
             )")
             , py::globals()/*, scope*/);
