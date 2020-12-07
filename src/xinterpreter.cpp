@@ -19,11 +19,11 @@
 #include "pybind11/eval.h"
 
 #include "xeus-python/xinterpreter.hpp"
+#include "xeus-python/xutils.hpp"
+#include "xeus-python/xtraceback.hpp"
 
 #include "xeus_robot_config.hpp"
 #include "xinterpreter.hpp"
-#include "xutils.hpp"
-#include "xtraceback.hpp"
 
 namespace nl = nlohmann;
 
@@ -90,7 +90,7 @@ namespace xrob
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
 
         // Maps source file for debugger
-        m_test_suite.attr("source") = get_cell_tmp_file(code);
+        m_test_suite.attr("source") = xpyt::get_cell_tmp_file(code);
 
         // Get execution result
         py::object result;
@@ -102,7 +102,7 @@ namespace xrob
         }
         catch (py::error_already_set& e)
         {
-            xerror error = extract_error(e);
+            xpyt::xerror error = xpyt::extract_error(e);
 
             std::vector<std::string> traceback({error.m_ename + ": " + error.m_evalue});
             if (!silent)
@@ -150,7 +150,7 @@ namespace xrob
         // Execute it
         try
         {
-            exec(py::str(code), module.attr("__dict__"));
+            xpyt::exec(py::str(code), module.attr("__dict__"));
 
             kernel_res["status"] = "ok";
             kernel_res["user_expressions"] = nl::json::object();
@@ -158,7 +158,7 @@ namespace xrob
         }
         catch (py::error_already_set& e)
         {
-            xerror error = extract_error(e);
+            xpyt::xerror error = xpyt::extract_error(e);
 
             if (!silent)
             {
@@ -270,13 +270,13 @@ namespace xrob
         try
         {
             py::dict scope = py::dict();
-            exec(py::str(code), py::globals()/*, scope*/);
+            xpyt::exec(py::str(code), py::globals());
 
-            exec(py::str(R"(
+            xpyt::exec(py::str(R"(
 listener = []
 listener.append(get_listener())
             )")
-            , py::globals()/*, scope*/);
+            , py::globals());
 
             m_listener = py::globals()["listener"];
             m_debug_adapter = py::globals()["processor"];
@@ -285,7 +285,7 @@ listener.append(get_listener())
         }
         catch (py::error_already_set& e)
         {
-            xerror error = extract_error(e);
+            xpyt::xerror error = xpyt::extract_error(e);
 
             publish_execution_error(error.m_ename, error.m_evalue, error.m_traceback);
 

@@ -27,9 +27,10 @@
 #include "xeus/xmiddleware.hpp"
 #include "xeus/xsystem.hpp"
 
+#include "xeus-python/xutils.hpp"
+
 #include "xdebugger.hpp"
 #include "xrobodebug_client.hpp"
-#include "xutils.hpp"
 
 namespace nl = nlohmann;
 namespace py = pybind11;
@@ -125,7 +126,7 @@ namespace xrob
         client.detach();
 
 
-        std::string tmp_folder =  get_tmp_prefix();
+        std::string tmp_folder = xpyt::get_tmp_prefix();
         xeus::create_directory(tmp_folder);
 
         xeus::create_directory(log_dir);
@@ -151,7 +152,7 @@ def get_listener():
         )";
 
         std::string code = var_py + init_logger_py + init_debugger_py + get_listener_py;
-    
+
         nl::json json_code;
         json_code["port"] = m_robodebug_port;
         json_code["code"] = code;
@@ -187,14 +188,14 @@ def get_listener():
 
     xeus::xdebugger_info debugger::get_debugger_info() const
     {
-        return xeus::xdebugger_info(get_hash_seed(),
-                                    get_tmp_prefix(),
-                                    get_tmp_suffix());
+        return xeus::xdebugger_info(xpyt::get_hash_seed(),
+                                    xpyt::get_tmp_prefix(),
+                                    xpyt::get_tmp_suffix());
     }
 
     std::string debugger::get_cell_temporary_file(const std::string& code) const
     {
-        return get_cell_tmp_file(code);
+        return xpyt::get_cell_tmp_file(code);
     }
 
     std::unique_ptr<xeus::xdebugger> make_robot_debugger(zmq::context_t& context,
@@ -206,4 +207,3 @@ def get_listener():
         return std::unique_ptr<xeus::xdebugger>(new debugger(context, config, user_name, session_id, debugger_config));
     }
 }
-

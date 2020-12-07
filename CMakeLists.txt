@@ -110,10 +110,6 @@ set(XROBOT_SRC
     src/xdebugger.cpp
     src/xrobodebug_client.hpp
     src/xrobodebug_client.cpp
-    src/xtraceback.hpp
-    src/xtraceback.cpp
-    src/xutils.hpp
-    src/xutils.cpp
 )
 
 # Targets and link
