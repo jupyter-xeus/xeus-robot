@@ -30,6 +30,9 @@ namespace nl = nlohmann;
 namespace py = pybind11;
 using namespace pybind11::literals;
 
+#define PYTHON_MODULE_REGEX "^%%python module ([a-zA-Z_]+)"
+
+
 namespace xrob
 {
 
@@ -70,7 +73,7 @@ namespace xrob
 
         // If it's Python code
         py::module re = py::module::import("re");
-        py::object match = re.attr("match")("^%%python module ([a-zA-Z_]+)", code);
+        py::object match = re.attr("match")(PYTHON_MODULE_REGEX, code);
         if (!match.is_none())
         {
             py::object module_name = py::list(match.attr("groups")())[0];
@@ -161,7 +164,7 @@ namespace xrob
 
         // If it's Python code
         py::module re = py::module::import("re");
-        py::object match = re.attr("match")("^%%python module ([a-zA-Z_]+)", code);
+        py::object match = re.attr("match")(PYTHON_MODULE_REGEX, code);
         if (!match.is_none())
         {
             py::object module_name = py::list(match.attr("groups")())[0];
