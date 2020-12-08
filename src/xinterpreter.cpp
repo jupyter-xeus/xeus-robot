@@ -71,26 +71,29 @@ namespace xrob
         // Acquire GIL before executing code
         py::gil_scoped_acquire acquire;
 
+        std::string filename = get_cell_tmp_file(code);
+
         // If it's Python code
         py::module re = py::module::import("re");
         py::object match = re.attr("match")(PYTHON_MODULE_REGEX, code);
         if (!match.is_none())
         {
-            py::object module_name = py::list(match.attr("groups")())[0];
+            py::object modulename = py::list(match.attr("groups")())[0];
 
             // Extract Python code from the cell
             std::string python_code = code;
             python_code.erase(0, py::list(match.attr("span")())[1].cast<int>());
 
-            return execute_python(python_code, module_name, silent);
+            return execute_python(python_code, modulename, filename, silent);
         }
+
+        // Maps source file for debugger/traceback
+        register_filename_mapping(filename, execution_count);
+        m_test_suite.attr("source") = py::str(filename);
 
         nl::json kernel_res;
 
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
-
-        // Maps source file for debugger
-        m_test_suite.attr("source") = get_cell_tmp_file(code);
 
         // Get execution result
         py::object result;
@@ -134,23 +137,31 @@ namespace xrob
 
     nl::json interpreter::execute_python(
         const std::string& code,
-        py::object module_name,
+        py::object modulename,
+        const std::string& filename,
         bool silent)
     {
         nl::json kernel_res;
 
         py::module sys = py::module::import("sys");
         py::module types = py::module::import("types");
+        py::module linecache = py::module::import("linecache");
+        py::module builtins = py::module::import("builtins");
 
         // Create Python module
-        py::object module = types.attr("ModuleType")(module_name);
+        py::object module = types.attr("ModuleType")(modulename);
 
-        sys.attr("modules")[module_name] = module;
+        sys.attr("modules")[modulename] = module;
+
+        // Caching the input code
+        linecache.attr("xupdatecache")(code, filename);
 
         // Execute it
         try
         {
-            exec(py::str(code), module.attr("__dict__"));
+            py::object compiled_code = builtins.attr("compile")(code, filename, "exec");
+
+            exec(compiled_code, module.attr("__dict__"));
 
             kernel_res["status"] = "ok";
             kernel_res["user_expressions"] = nl::json::object();
