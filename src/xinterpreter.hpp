@@ -39,7 +39,7 @@ namespace xrob
                                       nl::json user_expressions,
                                       bool allow_stdin) override;
 
-        nl::json execute_python(const std::string& code, py::object module_name, bool silent);
+        nl::json execute_python(const std::string& code, py::object modulename, const std::string& filename, bool silent);
 
         nl::json complete_request_impl(const std::string& code, int cursor_pos) override;
 
