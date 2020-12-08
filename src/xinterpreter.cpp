@@ -253,6 +253,12 @@ namespace xrob
         result["language_info"]["codemirror_mode"] = "robotframework";
         result["language_info"]["pygments_lexer"] = "robotframework";
 
+        result["help_links"] = nl::json::array();
+        result["help_links"][0] = nl::json::object({
+            {"text", "RobotFramework Reference"},
+            {"url", "https://robotframework.org"}
+        });
+
         result["status"] = "ok";
         return result;
     }
