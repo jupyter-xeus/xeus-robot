@@ -14,7 +14,6 @@ dependencies:
   - pybind11
   - pybind11_json
   - pip
-  - robotframework
   - robotframework-interpreter==0.2.0
   # Test dependencies
   - pytest

@@ -11,7 +11,7 @@
 ### Using conda
 
 ```bash
-conda install -c conda-forge
+conda install -c conda-forge xeus-robot
 ```
 
 ### Installing from source
@@ -19,7 +19,7 @@ conda install -c conda-forge
 You can install `xeus-robot` from the sources, you first need to install its dependencies:
 
 ```bash
-conda install -c conda-forge xeus-python xtl cmake cppzmq nlohmann_json pybind11 pybind11_json robotframework robotframework-interpreter
+conda install -c conda-forge xeus-python xtl cmake cppzmq nlohmann_json pybind11 pybind11_json robotframework-interpreter
 ```
 
 Then you can compile the sources:
