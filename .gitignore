@@ -3,3 +3,4 @@ test/__pycache__/
 build/*
 share/jupyter/kernels/xrobot/kernel.json
 notebooks/.ipynb_checkpoints/*
+*Untitled*.ipynb*
