@@ -144,14 +144,13 @@ s = connect(int(robot_port))
 processor = _RobotTargetComm(s, debug=True)
 processor.start_communication_threads()
         )";
-        std::string get_listener_py = R"(
-def get_listener():
-    from robotframework_debug_adapter.listeners import DebugListener
-    return DebugListener()
+        std::string init_listener_py = R"(
+from robotframework_debug_adapter.listeners import DebugListener
+debug_listener = DebugListener()
         )";
 
-        std::string code = var_py + init_logger_py + init_debugger_py + get_listener_py;
-    
+        std::string code = var_py + init_logger_py + init_debugger_py + init_listener_py;
+
         nl::json json_code;
         json_code["port"] = m_robodebug_port;
         json_code["code"] = code;
@@ -206,4 +205,3 @@ def get_listener():
         return std::unique_ptr<xeus::xdebugger>(new debugger(context, config, user_name, session_id, debugger_config));
     }
 }
-
