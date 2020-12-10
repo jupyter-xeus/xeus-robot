@@ -115,7 +115,7 @@ namespace xrob
         py::object result;
         try
         {
-            result = robot_interpreter.attr("execute")(code, m_test_suite, "listeners"_a=m_listeners);
+            result = robot_interpreter.attr("execute")(code, m_test_suite, "listeners"_a=m_listeners, "drivers"_a=m_drivers);
         }
         catch (py::error_already_set& e)
         {
