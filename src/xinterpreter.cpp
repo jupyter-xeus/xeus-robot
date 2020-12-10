@@ -109,16 +109,22 @@ namespace xrob
 
         nl::json kernel_res;
 
+        py::object outputdir = py::module::import("tempfile").attr("TemporaryDirectory")();
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
 
         // Get execution result
-        py::object result;
+        py::list result;
         try
         {
-            result = robot_interpreter.attr("execute")(code, m_test_suite, "listeners"_a=m_listeners, "drivers"_a=m_drivers);
+            result = robot_interpreter.attr("execute")(
+                code, m_test_suite, "listeners"_a=m_listeners, "drivers"_a=m_drivers,
+                "outputdir"_a=outputdir.attr("name")
+            );
         }
         catch (py::error_already_set& e)
         {
+            outputdir.attr("cleanup")();
+
             xerror error = extract_error(e);
 
             std::vector<std::string> traceback({error.m_ename + ": " + error.m_evalue});
@@ -135,19 +141,25 @@ namespace xrob
             return kernel_res;
         }
 
-        py::object return_value = m_return_value_listener.attr("get_last_value")();
-        if (!return_value.is_none())
+        // Publish tests report if there is one
+        if (!result[1].is_none())
         {
-            nl::json pub_data;
-
-            pub_data = m_return_value_listener.attr("get_last_value")();
-
-            xpyt::interpreter::publish_execution_result(execution_count, pub_data, nl::json::object());
+            xpyt::interpreter::publish_execution_result(execution_count, result[1], nl::json::object());
         }
+
+        // Publish the latest test evaluation
+        py::object last_test_evaluation = m_return_value_listener.attr("get_last_value")();
+        if (!last_test_evaluation.is_none())
+        {
+            py::globals()["display"](last_test_evaluation, "raw"_a=true);
+        }
+
+        outputdir.attr("cleanup")();
 
         kernel_res["status"] = "ok";
         kernel_res["user_expressions"] = nl::json::object();
         kernel_res["payload"] = nl::json::array();
+
         return kernel_res;
     }
 
