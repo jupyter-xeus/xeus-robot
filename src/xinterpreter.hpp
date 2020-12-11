@@ -60,6 +60,7 @@ namespace xrob
         py::object m_debug_listener;
         py::object m_keywords_listener;
         py::object m_return_value_listener;
+        py::object m_status_listener;
         py::list m_listeners;
 
         py::list m_drivers;
