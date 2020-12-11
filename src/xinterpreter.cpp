@@ -18,6 +18,8 @@
 #include "pybind11/functional.h"
 #include "pybind11/eval.h"
 
+#include "xeus/xguid.hpp"
+
 #include "xeus-python/xinterpreter.hpp"
 
 #include "xeus_robot_config.hpp"
@@ -67,6 +69,9 @@ namespace xrob
         m_return_value_listener = robot_interpreter.attr("ReturnValueListener")();
         m_listeners.append(m_return_value_listener);
 
+        m_status_listener = robot_interpreter.attr("StatusEventListener")();
+        m_listeners.append(m_status_listener);
+
         m_listeners.append(robot_interpreter.attr("RpaBrowserConnectionsListener")(m_drivers));
         m_listeners.append(robot_interpreter.attr("SeleniumConnectionsListener")(m_drivers));
         m_listeners.append(robot_interpreter.attr("JupyterConnectionsListener")(m_drivers));
@@ -111,6 +116,19 @@ namespace xrob
 
         py::object outputdir = py::module::import("tempfile").attr("TemporaryDirectory")();
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
+        py::object partial = py::module::import("functools").attr("partial");
+
+        // TODO Get rid of this when "update_display" is exposed to Python
+        py::object update_display = py::module::import("sys").attr("modules")["IPython.core.display"].attr("update_display");
+
+        // Create progress updater and pass it to the state listener
+        py::str display_id = py::str(xeus::new_xguid());
+
+        py::object progress_updater = robot_interpreter.attr("ProgressUpdater")(
+            partial(py::globals()["display"], "raw"_a=true, "display_id"_a=display_id),
+            partial(update_display, "raw"_a=true, "display_id"_a=display_id)
+        );
+        m_status_listener.attr("callback") = progress_updater.attr("update");
 
         // Get execution result
         py::list result;
@@ -123,7 +141,9 @@ namespace xrob
         }
         catch (py::error_already_set& e)
         {
+            // Cleanup
             outputdir.attr("cleanup")();
+            progress_updater.attr("clear")();
 
             xerror error = extract_error(e);
 
@@ -141,10 +161,19 @@ namespace xrob
             return kernel_res;
         }
 
-        // Publish tests report if there is one
-        if (!result[1].is_none())
+        // If the result is None, it means the suite has not been executed, instead
+        // widgets have been created
+        if (result[0].is_none())
         {
-            xpyt::interpreter::publish_execution_result(execution_count, result[1], nl::json::object());
+            for (const py::handle& widget: result[1])
+            {
+                py::globals()["display"](widget);
+            }
+        }
+        // Otherwise publish tests report if there is one
+        else if (!result[1].is_none())
+        {
+            publish_execution_result(execution_count, result[1], nl::json::object());
         }
 
         // Publish the latest test evaluation
@@ -154,7 +183,9 @@ namespace xrob
             py::globals()["display"](last_test_evaluation, "raw"_a=true);
         }
 
+        // Cleanup
         outputdir.attr("cleanup")();
+        progress_updater.attr("clear")();
 
         kernel_res["status"] = "ok";
         kernel_res["user_expressions"] = nl::json::object();
