@@ -8,12 +8,26 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XROB_HOME_HPP
-#define XROB_HOME_HPP
+#include "xeus/xsystem.hpp"
+#include "xinternal_utils.hpp"
 
 namespace xrob
 {
-    void set_pythonhome();
+    std::string get_tmp_prefix()
+    {
+        return xeus::get_tmp_prefix("xrobot");
+    }
+
+    std::string get_tmp_suffix()
+    {
+        return ".robot";
+    }
+
+    std::string get_cell_tmp_file(const std::string& content)
+    {
+        return xeus::get_cell_tmp_file(get_tmp_prefix(),
+                                       content,
+                                       get_tmp_suffix());
+    }
 }
 
-#endif

@@ -28,7 +28,8 @@
 #include "pybind11/embed.h"
 #include "pybind11/pybind11.h"
 
-#include "xpythonhome.hpp"
+#include "xeus-python/xpaths.hpp"
+
 #include "xinterpreter.hpp"
 #include "xdebugger.hpp"
 
@@ -98,7 +99,7 @@ int main(int argc, char* argv[])
 #endif
 
     // Setting Program Name
-    static const std::string executable(XEUS_PYTHON_EXECUTABLE);
+    static const std::string executable(xpyt::get_python_path());
     static const std::wstring wexecutable(executable.cbegin(), executable.cend());
 
     // On windows, sys.executable is not properly set with Py_SetProgramName
@@ -108,7 +109,7 @@ int main(int argc, char* argv[])
     Py_SetProgramName(const_cast<wchar_t*>(wexecutable.c_str()));
 
     // Setting PYTHONHOME
-    xrob::set_pythonhome();
+    xpyt::set_pythonhome();
     print_pythonhome();
 
     // Instanciating the Python interpreter

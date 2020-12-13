@@ -99,21 +99,15 @@ endif ()
 
 set(XROBOT_SRC
     src/main.cpp
+    src/xinternal_utils.hpp
+    src/xinternal_utils.cpp
     src/xinterpreter.hpp
     src/xinterpreter.cpp
-    src/xpaths.hpp
-    src/xpaths.cpp
-    src/xpythonhome.hpp
-    src/xpythonhome.cpp
     src/xeus_robot_config.hpp
     src/xdebugger.hpp
     src/xdebugger.cpp
     src/xrobodebug_client.hpp
     src/xrobodebug_client.cpp
-    src/xtraceback.hpp
-    src/xtraceback.cpp
-    src/xutils.hpp
-    src/xutils.cpp
 )
 
 # Targets and link

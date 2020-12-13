@@ -8,23 +8,17 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XROB_PATHS_HPP
-#define XROB_PATHS_HPP
+#ifndef XROB_INTERNAL_UTILS_HPP
+#define XROB_INTERNAL_UTILS_HPP
 
 #include <string>
 
 namespace xrob
 {
-    /*******************
-     * executable_path *
-     *******************/
-
-    std::string executable_path();
-
-    /***************
-     * prefix_path *
-     ***************/
-
-    std::string prefix_path();
+    std::string get_tmp_prefix();
+    std::string get_tmp_suffix();
+    std::string get_cell_tmp_file(const std::string& content);
 }
+
 #endif
+
