@@ -29,7 +29,7 @@
 
 #include "xdebugger.hpp"
 #include "xrobodebug_client.hpp"
-#include "xutils.hpp"
+#include "xinternal_utils.hpp"
 
 namespace nl = nlohmann;
 namespace py = pybind11;
@@ -186,7 +186,7 @@ debug_listener = DebugListener()
 
     xeus::xdebugger_info debugger::get_debugger_info() const
     {
-        return xeus::xdebugger_info(get_hash_seed(),
+        return xeus::xdebugger_info(xeus::get_tmp_hash_seed(),
                                     get_tmp_prefix(),
                                     get_tmp_suffix());
     }

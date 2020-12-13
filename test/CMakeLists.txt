@@ -79,7 +79,6 @@ find_package(Threads)
 include_directories(${GTEST_INCLUDE_DIRS} SYSTEM)
 
 set(XEUS_ROBOT_TESTS
-    ../src/xutils.cpp
     test_xrobot.cpp
     xeus_client.hpp
     xeus_client.cpp

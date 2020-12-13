@@ -21,11 +21,12 @@
 #include "xeus/xguid.hpp"
 
 #include "xeus-python/xinterpreter.hpp"
+#include "xeus-python/xtraceback.hpp"
+#include "xeus-python/xutils.hpp"
 
 #include "xeus_robot_config.hpp"
+#include "xinternal_utils.hpp"
 #include "xinterpreter.hpp"
-#include "xutils.hpp"
-#include "xtraceback.hpp"
 
 namespace nl = nlohmann;
 
@@ -109,7 +110,7 @@ namespace xrob
         }
 
         // Maps source file for debugger/traceback
-        register_filename_mapping(filename, execution_count);
+        xpyt::register_filename_mapping(filename, execution_count);
         m_test_suite.attr("source") = py::str(filename);
 
         nl::json kernel_res;
@@ -145,7 +146,7 @@ namespace xrob
             outputdir.attr("cleanup")();
             progress_updater.attr("clear")();
 
-            xerror error = extract_error(e);
+            xpyt::xerror error = xpyt::extract_error(e);
 
             std::vector<std::string> traceback({error.m_ename + ": " + error.m_evalue});
             if (!silent)
@@ -220,7 +221,7 @@ namespace xrob
         {
             py::object compiled_code = builtins.attr("compile")(code, filename, "exec");
 
-            exec(compiled_code, module.attr("__dict__"));
+            xpyt::exec(compiled_code, module.attr("__dict__"));
 
             kernel_res["status"] = "ok";
             kernel_res["user_expressions"] = nl::json::object();
@@ -231,7 +232,7 @@ namespace xrob
         }
         catch (py::error_already_set& e)
         {
-            xerror error = extract_error(e);
+            xpyt::xerror error = xpyt::extract_error(e);
 
             if (!silent)
             {
@@ -368,7 +369,7 @@ namespace xrob
 
             py::dict scope;
 
-            exec(py::str(code), scope);
+            xpyt::exec(py::str(code), scope);
 
             m_debug_listener = scope["debug_listener"];
             m_debug_adapter = scope["processor"];
@@ -379,7 +380,7 @@ namespace xrob
         }
         catch (py::error_already_set& e)
         {
-            xerror error = extract_error(e);
+            xpyt::xerror error = xpyt::extract_error(e);
 
             publish_execution_error(error.m_ename, error.m_evalue, error.m_traceback);
 
