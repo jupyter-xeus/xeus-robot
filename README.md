@@ -1,10 +1,9 @@
 # xeus-robot
 
 [![Azure Pipelines](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_apis/build/status/jupyter-xeus.xeus-robot?branchName=master)](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_build/latest?definitionId=3&branchName=master)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-robot/master?urlpath=/lab/tree/notebooks/xrobot.ipynb)
 
 `xeus-robot` is a Jupyter kernel for [Robot Framework](https://robotframework.org/) based on the native implementation of the Jupyter protocol [xeus](https://github.com/jupyter-xeus/xeus).
-
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-robot/master?urlpath=/lab/tree/notebooks/xrobot.ipynb)
 
 ## Installation
 
@@ -50,7 +49,8 @@ jupyter labextension install @marketsquare/jupyterlab_robotmode @jupyter-widgets
 
 | `xeus-robot`|  `xeus-python`  |      `xtl`      | `cppzmq` | `nlohmann_json` | `pybind11`     | `pybind11_json`   | `robotframework-interpreter` | `robotframework-lsp` |
 |-------------|-----------------|-----------------|----------|-----------------|----------------|-------------------|------------------------------|----------------------|
-|   master    |  >=0.9.1,<0.10  |  >=0.6.8,<0.7   |  ~4.7.1  |  >=3.6.1,<4.0   | >=2.2.4,<3.0   | >=0.2.6,<0.3      |  >=0.5.0,<0.6                |   >=0.4.2,<0.5       |
+|   master    |  >=0.9.3,<0.10  |  >=0.6.8,<0.7   |  ~4.7.1  |  >=3.6.1,<4.0   | >=2.2.4,<3.0   | >=0.2.6,<0.3      |  >=0.5.0,<0.6                |   >=0.4.2,<0.5       |
+|   0.0.5     |  >=0.9.3,<0.10  |  >=0.6.8,<0.7   |  ~4.7.1  |  >=3.6.1,<4.0   | >=2.2.4,<3.0   | >=0.2.6,<0.3      |  >=0.5.0,<0.6                |   >=0.4.2,<0.5       |
 |   0.0.4     |  >=0.9.1,<0.10  |  >=0.6.8,<0.7   |  ~4.7.1  |  >=3.6.1,<4.0   | >=2.2.4,<3.0   | >=0.2.6,<0.3      |  >=0.5.0,<0.6                |   >=0.4.2,<0.5       |
 |   0.0.3     |  >=0.8.7,<0.9   |  >=0.6.8,<0.7   |  ~4.7.1  |  >=3.6.1,<4.0   | >=2.2.4,<3.0   | >=0.2.6,<0.3      |  >=0.0.1,<0.1                |   >=0.4.2,<0.5       |
 |   0.0.2     |  >=0.8.5,<0.9   |  >=0.6.8,<0.7   |  ~4.4.1  |  >=3.6.1,<4.0   | >=2.2.4,<3.0   | >=0.2.6,<0.3      |  >=0.0.1,<0.1                |   >=0.4.2,<0.5       |
