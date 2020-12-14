@@ -283,12 +283,18 @@ namespace xrob
         return xrobot_res;
     }
 
-    nl::json interpreter::inspect_request_impl(const std::string& /*code*/,
-                                               int /*cursor_pos*/,
-                                               int /*detail_level*/)
+    nl::json interpreter::inspect_request_impl(const std::string& code,
+                                               int cursor_pos,
+                                               int detail_level)
     {
-        nl::json kernel_res;
-        return kernel_res;
+        // Acquire GIL before executing code
+        py::gil_scoped_acquire acquire;
+
+        py::module robot_interpreter = py::module::import("robotframework_interpreter");
+
+        nl::json xrobot_res = robot_interpreter.attr("inspect")(code, cursor_pos, m_test_suite, m_keywords_listener, detail_level);
+        xrobot_res["status"] = "ok";
+        return xrobot_res;
     }
 
     nl::json interpreter::is_complete_request_impl(const std::string& /*code*/)
