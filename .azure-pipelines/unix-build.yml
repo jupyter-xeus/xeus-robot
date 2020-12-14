@@ -42,6 +42,6 @@ steps:
 
   - script: |
       source activate xeus-robot
-      pytest test_xrobot_kernel.py
+      python test_xrobot_kernel.py -vvv
     displayName: Run jupyter kernel test
     workingDirectory: $(Build.SourcesDirectory)/test

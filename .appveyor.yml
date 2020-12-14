@@ -32,7 +32,7 @@ install:
   # Build dependencies
   - conda install cmake -c conda-forge
   # Install test dependencies
-  - conda install pytest jupyter_kernel_test -c conda-forge
+  - conda install jupyter_kernel_test -c conda-forge
   # Build and install xeus-robot
   - mkdir build
   - cd build
@@ -45,4 +45,4 @@ build_script:
   - cd test
   - test_xeus_robot
   - cd ../../test
-  - py.test . -vvv
+  - python test_xrobot_kernel.py -vvv
