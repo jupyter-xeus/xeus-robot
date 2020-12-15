@@ -3,5 +3,6 @@ channels:
   - conda-forge
 dependencies:
   - xeus-robot
+  - robotframework-lsp
   - jupyterlab=2
   - nodejs
