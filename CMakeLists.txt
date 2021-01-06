@@ -55,7 +55,7 @@ OPTION(XROB_DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
 # Dependencies
 # ============
 
-set(xeus_python_REQUIRED_VERSION 0.9.1)
+set(xeus_python_REQUIRED_VERSION 0.9.5)
 set(pybind11_json_REQUIRED_VERSION 0.2.2)
 
 find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
