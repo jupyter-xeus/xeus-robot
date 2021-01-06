@@ -10,7 +10,7 @@ jobs:
           py_version: 3.9
     pool:
       vmImage: ubuntu-16.04
-    timeoutInMinutes: 360
+    timeoutInMinutes: 30
     steps:
           
       - bash: echo "##vso[task.prependpath]$CONDA/bin"
