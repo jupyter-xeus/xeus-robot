@@ -34,6 +34,8 @@ make install -j6
 jupyter labextension install @marketsquare/jupyterlab_robotmode @jupyter-widgets/jupyterlab-manager
 ```
 
+https://github.com/martinRenou/xeus-robot/raw/try_video/debugger.mp4
+
 ## Dependencies
 
 ``xeus-robot`` depends on
