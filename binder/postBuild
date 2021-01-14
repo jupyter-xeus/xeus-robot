@@ -1,2 +1,0 @@
-jupyter labextension install @marketsquare/jupyterlab_robotmode @jupyterlab/debugger --debug --no-build
-jupyter lab build --minimize=False

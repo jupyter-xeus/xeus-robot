@@ -4,5 +4,7 @@ channels:
 dependencies:
   - xeus-robot
   - robotframework-lsp
-  - jupyterlab=2
-  - nodejs
+  - robotframework-seleniumlibrary
+  - robotframework-jupyterlibrary
+  - ipywidgets
+  - jupyterlab=3
