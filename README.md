@@ -1,4 +1,4 @@
-# xeus-robot
+# ![xeus-robot](xeus-robot.svg)
 
 [![Azure Pipelines](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_apis/build/status/jupyter-xeus.xeus-robot?branchName=master)](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_build/latest?definitionId=3&branchName=master)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-robot/master?urlpath=/lab/tree/notebooks/xrobot.ipynb)
