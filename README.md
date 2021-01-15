@@ -1,4 +1,4 @@
-# ![xeus-robot](xeus-robot.svg)
+![xeus-robot](images/xeus-robot.svg)
 
 [![Azure Pipelines](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_apis/build/status/jupyter-xeus.xeus-robot?branchName=master)](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_build/latest?definitionId=3&branchName=master)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-robot/master?urlpath=/lab/tree/notebooks/xrobot.ipynb)
@@ -18,7 +18,7 @@ conda install -c conda-forge xeus-robot
 You can install `xeus-robot` from the sources, you first need to install its dependencies:
 
 ```bash
-conda install -c conda-forge xeus-python xtl cmake cppzmq nlohmann_json pybind11 pybind11_json robotframework-interpreter jupyterlab_robotmode
+conda install -c conda-forge xeus-python xtl cmake cppzmq nlohmann_json pybind11 pybind11_json robotframework-interpreter ipywidgets jupyterlab_robotmode
 ```
 
 Then you can compile the sources:
@@ -57,3 +57,21 @@ jupyter labextension install @marketsquare/jupyterlab_robotmode @jupyter-widgets
 |   0.0.3     |  >=0.8.7,<0.9   |  >=0.6.8,<0.7   |  ~4.7.1  |  >=3.6.1,<4.0   | >=2.2.4,<3.0   | >=0.2.6,<0.3      |  >=0.0.1,<0.1                |   >=0.4.2,<0.5       |
 |   0.0.2     |  >=0.8.5,<0.9   |  >=0.6.8,<0.7   |  ~4.4.1  |  >=3.6.1,<4.0   | >=2.2.4,<3.0   | >=0.2.6,<0.3      |  >=0.0.1,<0.1                |   >=0.4.2,<0.5       |
 |   0.0.1     |  >=0.8.5,<0.9   |  >=0.6.8,<0.7   |  ~4.4.1  |  >=3.6.1,<4.0   | >=2.2.4,<3.0   | >=0.2.6,<0.3      |  >=0.0.1,<0.1                |   >=0.4.2,<0.5       |
+
+
+## Examples
+
+### Code completion
+![Code completion](images/completion.gif)
+
+### Code completion using Selenium selectors
+![Code completion with selenium](images/completion2.gif)
+
+### Custom RobotFramework library in Python
+![Custom Python library](images/python.gif)
+
+### Debugger support in JupyterLab 3
+![Debugger](images/debugger.gif)
+
+### Custom Keywords testing
+![Test Keyword](images/keywords.gif)
