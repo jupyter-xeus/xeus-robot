@@ -6,5 +6,5 @@ dependencies:
   - robotframework-lsp
   - robotframework-seleniumlibrary
   - robotframework-jupyterlibrary
-  - ipywidgets
+  - ipywidgets>=7.6
   - jupyterlab=3
