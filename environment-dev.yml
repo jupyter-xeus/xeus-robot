@@ -5,7 +5,7 @@ dependencies:
   # Builde dependencies
   - cmake
   # Host dependencies
-  - xeus-python==0.9.5
+  - xeus-python==0.10.0
   - robotframework-interpreter
   - robotframework-lsp
   - xtl
