@@ -2,10 +2,10 @@ name: xeus-robot
 channels:
   - conda-forge
 dependencies:
-  # Builde dependencies
+  # Build dependencies
   - cmake
   # Host dependencies
-  - xeus-python==0.10.0
+  - xeus-python>=0.10.1,<0.11
   - robotframework-interpreter
   - robotframework-lsp
   - xtl
