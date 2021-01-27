@@ -119,15 +119,12 @@ namespace xrob
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
         py::object partial = py::module::import("functools").attr("partial");
 
-        // TODO Get rid of this when "update_display" is exposed to Python
-        py::object update_display = py::module::import("sys").attr("modules")["IPython.core.display"].attr("update_display");
-
         // Create progress updater and pass it to the state listener
         py::str display_id = py::str(xeus::new_xguid());
 
         py::object progress_updater = robot_interpreter.attr("ProgressUpdater")(
             partial(py::globals()["display"], "raw"_a=true, "display_id"_a=display_id),
-            partial(update_display, "raw"_a=true, "display_id"_a=display_id)
+            partial(py::globals()["update_display"], "raw"_a=true, "display_id"_a=display_id)
         );
         m_status_listener.attr("callback") = progress_updater.attr("update");
 
