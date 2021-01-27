@@ -218,6 +218,9 @@ namespace xrob
         {
             py::object compiled_code = builtins.attr("compile")(code, filename, "exec");
 
+            // Inject display in the scope
+            module.attr("__dict__")["display"] = py::globals()["display"];
+
             xpyt::exec(compiled_code, module.attr("__dict__"));
 
             kernel_res["status"] = "ok";
