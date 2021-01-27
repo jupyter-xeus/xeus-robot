@@ -29,6 +29,7 @@
 #include "pybind11/pybind11.h"
 
 #include "xeus-python/xpaths.hpp"
+#include "xeus_robot_config.hpp"
 
 #include "xinterpreter.hpp"
 #include "xdebugger.hpp"
@@ -50,7 +51,19 @@ void handler(int sig)
 
 namespace py = pybind11;
 
-std::string extract_filename(int& argc, char* argv[])
+bool should_print_version(int argc, char* argv[])
+{
+    for (int i = 0; i < argc; ++i)
+    {
+        if (std::string(argv[i]) == "--version")
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::string extract_filename(int argc, char* argv[])
 {
     std::string res = "";
     for (int i = 0; i < argc; ++i)
@@ -82,6 +95,12 @@ void print_pythonhome()
 
 int main(int argc, char* argv[])
 {
+    if (should_print_version(argc, argv))
+    {
+        std::clog << "xrobot " << XROB_VERSION << std::endl;
+        return 0;
+    }
+
     // If we are called from the Jupyter launcher, silence all logging. This
     // is important for a JupyterHub configured with cleanup_servers = False:
     // Upon restart, spawned single-user servers keep running but without the
