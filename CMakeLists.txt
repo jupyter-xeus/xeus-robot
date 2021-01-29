@@ -67,9 +67,6 @@ find_package(pybind11_json ${pybind11_json_REQUIRED_VERSION} REQUIRED)
 
 include(CheckCXXCompilerFlag)
 
-#set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
-set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
-
 if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251 /wd4141")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4018 /wd4267 /wd4715 /wd4146 /wd4129")
