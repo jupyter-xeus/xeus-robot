@@ -106,7 +106,6 @@ set_target_properties(test_xeus_robot PROPERTIES
 
 include_directories(${PYTHON_INCLUDE_DIRS})
 target_link_libraries(test_xeus_robot ${PYTHON_LIBRARIES} xeus ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_compile_definitions(test_xeus_robot PRIVATE XEUS_PYTHONHOME="${PYTHON_PREFIX}")
 target_include_directories(test_xeus_robot PRIVATE ${XEUS_ROBOT_INCLUDE_DIR})
 
 add_custom_target(xtest COMMAND test_xeus_robot DEPENDS test_xeus_robot)
