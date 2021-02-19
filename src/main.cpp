@@ -134,6 +134,19 @@ int main(int argc, char* argv[])
     // Instanciating the Python interpreter
     py::scoped_interpreter guard;
 
+    // Setting argv
+    wchar_t** argw = new wchar_t*[size_t(argc)];
+    for(auto i = 0; i < argc; ++i)
+    {
+        argw[i] = Py_DecodeLocale(argv[i], nullptr);
+    }
+    PySys_SetArgvEx(argc, argw, 0);
+    for(auto i = 0; i < argc; ++i)
+    {
+        PyMem_RawFree(argw[i]);
+    }
+    delete[] argw;
+
     // Instantiating the xeus xinterpreter
     using interpreter_ptr = std::unique_ptr<xrob::interpreter>;
     interpreter_ptr interpreter = interpreter_ptr(new xrob::interpreter());

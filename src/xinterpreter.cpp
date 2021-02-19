@@ -122,9 +122,11 @@ namespace xrob
         // Create progress updater and pass it to the state listener
         py::str display_id = py::str(xeus::new_xguid());
 
+        py::module display = py::module::import("IPython.display");
+
         py::object progress_updater = robot_interpreter.attr("ProgressUpdater")(
-            partial(py::globals()["display"], "raw"_a=true, "display_id"_a=display_id),
-            partial(py::globals()["update_display"], "raw"_a=true, "display_id"_a=display_id)
+            partial(display.attr("display"), "raw"_a=true, "display_id"_a=display_id),
+            partial(display.attr("update_display"), "raw"_a=true, "display_id"_a=display_id)
         );
         m_status_listener.attr("callback") = progress_updater.attr("update");
 
@@ -165,7 +167,7 @@ namespace xrob
         {
             for (const py::handle& widget: result[1])
             {
-                py::globals()["display"](widget);
+                display.attr("display")(widget);
             }
         }
         // Otherwise publish tests report if there is one
@@ -178,7 +180,7 @@ namespace xrob
         py::object last_test_evaluation = m_return_value_listener.attr("get_last_value")();
         if (!last_test_evaluation.is_none())
         {
-            py::globals()["display"](last_test_evaluation, "raw"_a=true);
+            display.attr("display")(last_test_evaluation, "raw"_a=true);
         }
 
         // Cleanup
@@ -204,6 +206,7 @@ namespace xrob
         py::module types = py::module::import("types");
         py::module linecache = py::module::import("linecache");
         py::module builtins = py::module::import("builtins");
+        py::module display = py::module::import("IPython.display");
 
         // Create Python module
         py::object module = types.attr("ModuleType")(modulename);
@@ -211,7 +214,7 @@ namespace xrob
         sys.attr("modules")[modulename] = module;
 
         // Caching the input code
-        linecache.attr("xupdatecache")(code, filename);
+        linecache.attr("updatecache")(code, filename);
 
         // Execute it
         try
@@ -219,7 +222,7 @@ namespace xrob
             py::object compiled_code = builtins.attr("compile")(code, filename, "exec");
 
             // Inject display in the scope
-            module.attr("__dict__")["display"] = py::globals()["display"];
+            module.attr("__dict__")["display"] = display.attr("display");
 
             xpyt::exec(compiled_code, module.attr("__dict__"));
 
