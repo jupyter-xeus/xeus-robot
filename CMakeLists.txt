@@ -47,6 +47,12 @@ configure_file (
 # Compilation options
 OPTION(XROB_DISABLE_ARCH_NATIVE "disable -march=native flag" OFF)
 OPTION(XROB_DISABLE_TUNE_GENERIC "disable -mtune=generic flag" OFF)
+OPTION(XROB_ENABLE_PYPI_WARNING "Enable warning on PyPI wheels" OFF)
+
+OPTION(XROB_BUILD_XROBOT_EXECUTABLE "Build the xrobot executable" ON)
+OPTION(XROB_BUILD_XROBOT_EXTENSION "Build the xrobot extension module" OFF)
+
+OPTION(XROB_USE_SHARED_XEUS_PYTHON "Link xrobot and xrobot_extension with the xeus-python shared library (instead of the static library)" ON)
 
 # Test options
 OPTION(XROB_BUILD_TESTS "xeus-robot test suite" OFF)
@@ -106,92 +112,117 @@ set(XROBOT_SRC
     src/xrobodebug_client.cpp
 )
 
-# Targets and link
-# ================
+set(XROBOT_EXTENSION_SRC
+    src/xrobot_extension.cpp
+    src/xinternal_utils.hpp
+    src/xinternal_utils.cpp
+    src/xinterpreter.hpp
+    src/xinterpreter.cpp
+    src/xeus_robot_config.hpp
+    src/xdebugger.hpp
+    src/xdebugger.cpp
+    src/xrobodebug_client.hpp
+    src/xrobodebug_client.cpp
+)
 
-include(CheckCXXCompilerFlag)
+# Targets and link - Macros
+# =========================
 
 string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
 
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib; ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 
+include(CheckCXXCompilerFlag)
+
+macro(xrob_set_common_options target_name)
+    if (MSVC)
+        target_compile_options(${target_name} PUBLIC /wd4251 /wd4141)
+        target_compile_options(${target_name} PUBLIC /wd4018 /wd4267 /wd4715 /wd4146 /wd4129)
+    endif ()
+
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR
+        CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR
+        CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+
+        target_compile_options(${target_name} PUBLIC -Wunused-parameter -Wextra -Wreorder)
+
+        # Mtune generic/native
+        if (XROB_DISABLE_ARCH_NATIVE AND NOT XROB_DISABLE_TUNE_GENERIC)
+            target_compile_options(${target_name} PUBLIC -mtune=generic)
+        elseif (XROB_DISABLE_TUNE_GENERIC)
+        else ()
+            target_compile_options(${target_name} PUBLIC -march=native)
+        endif ()
+
+        # C++14 flag
+        CHECK_CXX_COMPILER_FLAG("-std=c++14" HAS_CPP14_FLAG)
+        if (HAS_CPP14_FLAG)
+            target_compile_features(${target_name} PRIVATE cxx_std_14)
+        else ()
+            message(FATAL_ERROR "Unsupported compiler -- xeus-robot requires C++14 support!")
+        endif ()
+    endif ()
+
+    if (APPLE)
+        set_target_properties(${target_name} PROPERTIES
+            MACOSX_RPATH ON
+        )
+    else ()
+        set_target_properties(${target_name} PROPERTIES
+            BUILD_WITH_INSTALL_RPATH 1
+            SKIP_BUILD_RPATH FALSE
+        )
+    endif ()
+
+    set_target_properties(${target_name} PROPERTIES
+        INSTALL_RPATH_USE_LINK_PATH TRUE
+    )
+endmacro()
+
+# Common macro kernels (xpython and xpython_extension)
+macro(xrob_set_kernel_options target_name)
+    if(XROB_ENABLE_PYPI_WARNING)
+        message(STATUS "Enabling PyPI warning for target: " ${target_name})
+        target_compile_definitions(${target_name} PRIVATE XEUS_ROBOT_PYPI_WARNING)
+    endif()
+
+    if (XROB_USE_SHARED_XEUS_PYTHON)
+        target_link_libraries(${target_name} PRIVATE xeus-python)
+
+        if(CMAKE_DL_LIBS)
+            target_link_libraries(${target_name} PRIVATE ${CMAKE_DL_LIBS} util)
+        endif()
+    else ()
+        target_link_libraries(${target_name} PRIVATE xeus-python-static)
+    endif()
+
+    if (XEUS_PYTHONHOME_RELPATH)
+        target_compile_definitions(${target_name} PRIVATE XEUS_PYTHONHOME_RELPATH=${XEUS_PYTHONHOME_RELPATH})
+    endif()
+
+    find_package(Threads) # TODO: add Threads as a dependence of xeus or xeus-static?
+    target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+endmacro()
+
 # xrobot
 # ======
-add_executable(xrobot ${XROBOT_SRC})
-target_link_libraries(xrobot PRIVATE pybind11::embed)
 
-if (XEUS_PYTHONHOME_RELPATH)
-    target_compile_definitions(xrobot PRIVATE XEUS_PYTHONHOME_RELPATH=${XEUS_PYTHONHOME_RELPATH})
+if (XROB_BUILD_XROBOT_EXECUTABLE)
+    add_executable(xrobot ${XROBOT_SRC})
+    target_link_libraries(xrobot PRIVATE pybind11::embed)
+
+    xrob_set_common_options(xrobot)
+    xrob_set_kernel_options(xrobot)
 endif()
 
-target_compile_definitions(xrobot PRIVATE XEUS_PYTHON_EXECUTABLE="${PYTHON_EXECUTABLE}")
+# xpython_extension
+# =================
 
-if (MSVC)
-    target_compile_options(xrobot PUBLIC /wd4251 /wd4141)
-    target_compile_options(xrobot PUBLIC /wd4018 /wd4267 /wd4715 /wd4146 /wd4129)
-endif ()
+if (XROB_BUILD_XROBOT_EXTENSION)
+    pybind11_add_module(xrobot_extension ${XROBOT_EXTENSION_SRC})
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR
-    CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR
-    CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-
-    target_compile_options(xrobot PUBLIC -Wunused-parameter -Wextra -Wreorder)
-
-    # C++14 flag
-    CHECK_CXX_COMPILER_FLAG("-std=c++14" HAS_CPP14_FLAG)
-    if (HAS_CPP14_FLAG)
-        target_compile_features(xrobot PRIVATE cxx_std_14)
-    else ()
-        message(FATAL_ERROR "Unsupported compiler -- xeus-robot requires C++14 support!")
-    endif ()
-
-    # Enable link time optimization and set the default symbol
-    # visibility to hidden (very important to obtain small binaries)
-    if (NOT ${U_CMAKE_BUILD_TYPE} MATCHES DEBUG)
-        # Check for Link Time Optimization support
-        # (GCC/Clang)
-        CHECK_CXX_COMPILER_FLAG("-flto" HAS_LTO_FLAG)
-        if (HAS_LTO_FLAG)
-            target_compile_options(xrobot PUBLIC -flto)
-        endif ()
-
-        # Avoids removing symbols from the static library
-        CHECK_CXX_COMPILER_FLAG("-ffat-lto-objects" HAS_FATLTO_FLAG)
-        if (${linkage_upper} MATCHES "STATIC" AND  HAS_FATLTO_FLAG)
-            message(STATUS "ENABLE FAT LTO OBJECTS")
-            target_compile_options(xrobot PUBLIC -ffat-lto-objects)
-        endif ()
-
-        # Intel equivalent to LTO is called IPO
-        if (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-            CHECK_CXX_COMPILER_FLAG("-ipo" HAS_IPO_FLAG)
-            if (HAS_IPO_FLAG)
-                target_compile_options(xrobot PUBLIC -ipo)
-            endif ()
-        endif ()
-    endif ()
-
-endif ()
-
-if (APPLE)
-    set_target_properties(xrobot PROPERTIES
-        MACOSX_RPATH ON
-    )
-else ()
-    set_target_properties(xrobot PROPERTIES
-        BUILD_WITH_INSTALL_RPATH 1
-        SKIP_BUILD_RPATH FALSE
-    )
-endif ()
-
-set_target_properties(xrobot PROPERTIES
-    INSTALL_RPATH_USE_LINK_PATH TRUE
-)
-find_package(Threads)
-target_link_libraries(xrobot PRIVATE xeus-python xeus ${CMAKE_THREAD_LIBS_INIT})
-
-if(CMAKE_DL_LIBS)
-    target_link_libraries(xrobot PRIVATE ${CMAKE_DL_LIBS} util)
+    xrob_set_common_options(xrobot_extension)
+    xrob_set_kernel_options(xrobot_extension)
 endif()
 
 # Tests
@@ -209,21 +240,23 @@ endif()
 # ============
 
 # Install xrobot
-install(TARGETS xrobot
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+if (XROB_BUILD_XROBOT_EXECUTABLE)
+    install(TARGETS xrobot
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-# Configuration and data directories for jupyter and xeus-python
-set(XJUPYTER_DATA_DIR "share/jupyter"    CACHE STRING "Jupyter data directory")
+    # Configuration and data directories for jupyter and xeus-python
+    set(XJUPYTER_DATA_DIR "share/jupyter"    CACHE STRING "Jupyter data directory")
 
-# Install xrobot Jupyter kernelspec
-set(XROB_KERNELSPEC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels)
-install(DIRECTORY ${XROB_KERNELSPEC_DIR}
-        DESTINATION ${XJUPYTER_DATA_DIR}
-        PATTERN "*.in" EXCLUDE)
-
-# Extra path for installing Jupyter kernelspec
-if (XEXTRA_JUPYTER_DATA_DIR)
+    # Install xrobot Jupyter kernelspec
+    set(XROB_KERNELSPEC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels)
     install(DIRECTORY ${XROB_KERNELSPEC_DIR}
-            DESTINATION ${XEXTRA_JUPYTER_DATA_DIR}
+            DESTINATION ${XJUPYTER_DATA_DIR}
             PATTERN "*.in" EXCLUDE)
-endif ()
+
+    # Extra path for installing Jupyter kernelspec
+    if (XEXTRA_JUPYTER_DATA_DIR)
+        install(DIRECTORY ${XROB_KERNELSPEC_DIR}
+                DESTINATION ${XEXTRA_JUPYTER_DATA_DIR}
+                PATTERN "*.in" EXCLUDE)
+    endif ()
+endif()
