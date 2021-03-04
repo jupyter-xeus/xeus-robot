@@ -64,8 +64,12 @@ OPTION(XROB_DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
 set(xeus_python_REQUIRED_VERSION 0.11.1)
 set(pybind11_json_REQUIRED_VERSION 0.2.2)
 
-find_package(xeus-python ${xeus_python_REQUIRED_VERSION} REQUIRED)
-find_package(pybind11_json ${pybind11_json_REQUIRED_VERSION} REQUIRED)
+if (NOT TARGET xeus-python AND NOT TARGET xeus-python-static)
+    find_package(xeus-python ${xeus_python_REQUIRED_VERSION} REQUIRED)
+endif ()
+if (NOT TARGET pybind11_json)
+    find_package(pybind11_json ${pybind11_json_REQUIRED_VERSION} REQUIRED)
+endif ()
 
 # Flags
 # =====
