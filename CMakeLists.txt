@@ -62,10 +62,18 @@ OPTION(XROB_DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
 # ============
 
 set(xeus_python_REQUIRED_VERSION 0.11.1)
-set(pybind11_json_REQUIRED_VERSION 0.2.2)
+set(pybind11_REQUIRED_VERSION 2.6.0)
+set(pybind11_json_REQUIRED_VERSION 0.2.8)
 
-find_package(xeus-python ${xeus_python_REQUIRED_VERSION} REQUIRED)
-find_package(pybind11_json ${pybind11_json_REQUIRED_VERSION} REQUIRED)
+if (NOT TARGET xeus-python AND NOT TARGET xeus-python-static)
+    find_package(xeus-python ${xeus_python_REQUIRED_VERSION} REQUIRED)
+endif ()
+if (NOT TARGET pybind11::headers)
+    find_package(pybind11 ${pybind11_REQUIRED_VERSION} REQUIRED)
+endif ()
+if (NOT TARGET pybind11_json)
+    find_package(pybind11_json ${pybind11_json_REQUIRED_VERSION} REQUIRED)
+endif ()
 
 # Flags
 # =====
@@ -199,6 +207,8 @@ macro(xrob_set_kernel_options target_name)
     if (XEUS_PYTHONHOME_RELPATH)
         target_compile_definitions(${target_name} PRIVATE XEUS_PYTHONHOME_RELPATH=${XEUS_PYTHONHOME_RELPATH})
     endif()
+
+    target_link_libraries(${target_name} PRIVATE pybind11::pybind11 pybind11_json)
 
     find_package(Threads) # TODO: add Threads as a dependence of xeus or xeus-static?
     target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT})

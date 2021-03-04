@@ -27,8 +27,8 @@ namespace py = pybind11;
 void launch(const std::string& connection_filename)
 {
     // Instantiating the xeus xinterpreter
-    using interpreter_ptr = std::unique_ptr<xpyt::interpreter>;
-    interpreter_ptr interpreter = interpreter_ptr(new xpyt::interpreter());
+    using interpreter_ptr = std::unique_ptr<xrob::interpreter>;
+    interpreter_ptr interpreter = interpreter_ptr(new xrob::interpreter());
 
     using history_manager_ptr = std::unique_ptr<xeus::xhistory_manager>;
     history_manager_ptr hist = xeus::make_in_memory_history_manager();
@@ -93,7 +93,7 @@ void launch(const std::string& connection_filename)
     }
 }
 
-PYBIND11_MODULE(xpython_extension, m)
+PYBIND11_MODULE(xrobot_extension, m)
 {
     m.doc() = "Xeus-robot kernel launcher";
     m.def("launch", launch, py::arg("connection_filename") = "", "Launch the Jupyter kernel");
