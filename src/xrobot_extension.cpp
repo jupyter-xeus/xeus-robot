@@ -93,7 +93,7 @@ void launch(const std::string& connection_filename)
     }
 }
 
-PYBIND11_MODULE(xpython_extension, m)
+PYBIND11_MODULE(xrobot_extension, m)
 {
     m.doc() = "Xeus-robot kernel launcher";
     m.def("launch", launch, py::arg("connection_filename") = "", "Launch the Jupyter kernel");
