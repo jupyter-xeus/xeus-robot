@@ -185,8 +185,9 @@ int main(int argc, char* argv[])
                              std::move(interpreter),
                              std::move(hist),
                              nullptr,
-                             xeus::make_xserver_shell_main);
-                             // xpyt::make_python_debugger);
+                             xeus::make_xserver_shell_main,
+                             xrob::make_robot_debugger,
+                             debugger_config);
 
         const auto& config = kernel.get_config();
         std::clog <<
