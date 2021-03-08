@@ -13,6 +13,14 @@
 conda install -c conda-forge xeus-robot
 ```
 
+### Using pip
+
+Depending on the platform, PyPI wheels may be available for xeus-robot.
+
+```bash
+pip install xeus-robot
+```
+
 ### Installing from source
 
 You can install `xeus-robot` from the sources, you first need to install its dependencies:
