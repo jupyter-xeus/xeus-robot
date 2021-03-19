@@ -136,7 +136,7 @@ namespace xrob
         {
             result = robot_interpreter.attr("execute")(
                 code, m_test_suite, "listeners"_a=m_listeners, "drivers"_a=m_drivers,
-                "outputdir"_a=outputdir.attr("name")
+                "outputdir"_a=outputdir.attr("name"), "logger"_a=m_logger
             );
         }
         catch (py::error_already_set& e)
@@ -281,7 +281,9 @@ namespace xrob
 
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
 
-        nl::json xrobot_res = robot_interpreter.attr("complete")(code, cursor_pos, m_test_suite, m_keywords_listener, m_python_modules, m_drivers);
+        nl::json xrobot_res = robot_interpreter.attr("complete")(
+            code, cursor_pos, m_test_suite, m_keywords_listener, m_python_modules, m_drivers, "logger"_a=m_logger
+        );
         xrobot_res["status"] = "ok";
         return xrobot_res;
     }
@@ -312,7 +314,9 @@ namespace xrob
 
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
 
-        nl::json xrobot_res = robot_interpreter.attr("inspect")(code, cursor_pos, m_test_suite, m_keywords_listener, detail_level);
+        nl::json xrobot_res = robot_interpreter.attr("inspect")(
+            code, cursor_pos, m_test_suite, m_keywords_listener, detail_level, "logger"_a=m_logger
+        );
         xrobot_res["status"] = "ok";
         return xrobot_res;
     }
