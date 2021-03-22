@@ -54,9 +54,13 @@ namespace xrob
 
         py::gil_scoped_acquire acquire;
 
-        // Initialize the test suite
+        py::module os = py::module::import("os");
+        py::module logging = py::module::import("logging");
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
 
+        py::object formatter_cls = py::module::import("traitlets.config.application").attr("LevelFormatter");
+
+        // Initialize the test suite
         m_test_suite = robot_interpreter.attr("init_suite")("name"_a="xeus-robot");
 
         // Initialize listeners
@@ -80,6 +84,21 @@ namespace xrob
         m_listeners.append(robot_interpreter.attr("WhiteLibraryListener")(m_drivers));
 
         m_debug_adapter = py::none();
+
+        // Format and redirect all logging to the terminal
+        py::object formatter = formatter_cls(
+            "fmt"_a= "%(asctime)s.%(msecs)03d › %(levelname)s › %(name)s › %(process)d › %(message)s",
+            "datefmt"_a="%Y/%m/%d %H:%M:%S"
+        );
+
+        py::object handler = logging.attr("StreamHandler")(m_terminal_stream);
+        handler.attr("setFormatter")(formatter);
+
+        py::object handlers = py::list(0);
+        handlers.attr("append")(handler);
+
+        logging.attr("getLogger")().attr("handlers") = handlers;
+        m_logger.attr("handlers") = handlers;
     }
 
     nl::json interpreter::execute_request_impl(
