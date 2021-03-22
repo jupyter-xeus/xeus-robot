@@ -56,6 +56,7 @@ namespace xrob
 
         // Initialize the test suite
         py::module robot_interpreter = py::module::import("robotframework_interpreter");
+        py::module logging = py::module::import("logging");
 
         m_test_suite = robot_interpreter.attr("init_suite")("name"_a="xeus-robot");
 
@@ -80,6 +81,10 @@ namespace xrob
         m_listeners.append(robot_interpreter.attr("WhiteLibraryListener")(m_drivers));
 
         m_debug_adapter = py::none();
+
+        // Redirect all logging to the terminal
+        logging.attr("getLogger")().attr("handlers") = py::list(0);
+        logging.attr("getLogger")().attr("addHandler")(logging.attr("StreamHandler")(m_terminal_stream));
     }
 
     nl::json interpreter::execute_request_impl(
