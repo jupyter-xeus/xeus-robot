@@ -2,7 +2,7 @@ name: xeus-robot
 channels:
   - conda-forge
 dependencies:
-  - xeus-robot=0.3.1
+  - xeus-robot=0.3.2
   - robotframework-lsp
   - robotframework-seleniumlibrary
   - robotframework-jupyterlibrary
