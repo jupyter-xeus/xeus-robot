@@ -7,10 +7,10 @@
 
 ## Installation
 
-### Using conda
+### Using mamba (or conda)
 
 ```bash
-conda install -c conda-forge xeus-robot
+mamba install -c conda-forge xeus-robot
 ```
 
 ### Using pip
@@ -26,7 +26,7 @@ pip install xeus-robot
 You can install `xeus-robot` from the sources, you first need to install its dependencies:
 
 ```bash
-conda install -c conda-forge xeus-python xtl cmake cppzmq nlohmann_json pybind11 pybind11_json robotframework-interpreter ipywidgets jupyterlab_robotmode
+mamba install -c conda-forge xeus-python xtl cmake cppzmq nlohmann_json pybind11 pybind11_json robotframework-interpreter ipywidgets jupyterlab_robotmode
 ```
 
 Then you can compile the sources:
