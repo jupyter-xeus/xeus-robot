@@ -6,7 +6,7 @@ dependencies:
   - cmake
   # Host dependencies
   - xeus-python>=0.12.1,<0.13
-  - robotframework-lsp
+  - robotframework-lsp>=0.14,<0.15
   - xtl
   - cppzmq
   - nlohmann_json

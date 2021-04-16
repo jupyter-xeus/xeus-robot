@@ -145,8 +145,9 @@ processor = _RobotTargetComm(s, debug=True)
 processor.start_communication_threads()
         )";
         std::string init_listener_py = R"(
-from robotframework_debug_adapter.listeners import DebugListener
+from robotframework_debug_adapter.listeners import DebugListener, DebugListenerV2
 debug_listener = DebugListener()
+debug_listenerv2 = DebugListenerV2()
         )";
 
         std::string code = var_py + init_logger_py + init_debugger_py + init_listener_py;
