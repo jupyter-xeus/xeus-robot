@@ -67,6 +67,7 @@ namespace xrob
         m_listeners = py::list();
         m_drivers = py::list();
         m_debug_listener = py::none();
+        m_debug_listenerv2 = py::none();
 
         m_keywords_listener = robot_interpreter.attr("RobotKeywordsIndexerListener")();
         m_listeners.append(m_keywords_listener);
@@ -410,6 +411,7 @@ namespace xrob
             try
             {
                 m_listeners.attr("remove")(m_debug_listener);
+                m_listeners.attr("remove")(m_debug_listenerv2);
             }
             catch(py::error_already_set& e)
             {
@@ -421,9 +423,11 @@ namespace xrob
             xpyt::exec(py::str(code), scope);
 
             m_debug_listener = scope["debug_listener"];
+            m_debug_listenerv2 = scope["debug_listenerv2"];
             m_debug_adapter = scope["processor"];
 
             m_listeners.append(m_debug_listener);
+            m_listeners.append(m_debug_listenerv2);
 
             reply["status"] = "ok";
         }
