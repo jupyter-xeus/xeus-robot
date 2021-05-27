@@ -135,7 +135,7 @@ TEST(xrobot, kernel_info)
         client.send_on_control("kernel_info_request", make_kernel_info_request());
         nl::json res = client.receive_on_control();
         std::cout << "received: " << std::endl << res.dump(4) << std::endl;
-        
+
         client.send_on_control("shutdown_request", make_shutdown_request());
         client.receive_on_control();
 
