@@ -29,11 +29,12 @@ You can install `xeus-robot` from the sources, you first need to install its dep
 mamba install -c conda-forge xeus-python xtl cmake cppzmq nlohmann_json pybind11 pybind11_json robotframework-interpreter ipywidgets jupyterlab_robotmode
 ```
 
-Then you can compile the sources:
+Then you can compile the sources (replace $CONDA_PREFIX with a custom installation prefix if need be)
 
 ```bash
-cmake -D CMAKE_INSTALL_PREFIX=$CONDA_PREFIX .
-make install -j6
+mkdir build && cd build
+cmake .. -D CMAKE_PREFIX_PATH=$CONDA_PREFIX -D CMAKE_INSTALL_PREFIX=$CONDA_PREFIX -D CMAKE_INSTALL_LIBDIR=lib -D PYTHON_EXECUTABLE=`which python`
+make install
 ```
 
 ### Install the syntax highlighting and widgets for JupyterLab 1 and 2 (It is automatically installed for JupyterLab 3)
