@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 
 #include "nlohmann/json.hpp"
 
@@ -26,6 +27,7 @@
 
 #include "xeus_robot_config.hpp"
 #include "xinternal_utils.hpp"
+#include "xtraceback.hpp"
 #include "xinterpreter.hpp"
 
 namespace nl = nlohmann;
@@ -159,24 +161,24 @@ namespace xrob
                 "outputdir"_a=outputdir.attr("name"), "logger"_a=m_logger
             );
         }
+        // Execution error (e.g. lib import failed)
         catch (py::error_already_set& e)
         {
             // Cleanup
             outputdir.attr("cleanup")();
             progress_updater.attr("clear")();
 
-            xpyt::xerror error = xpyt::extract_error(e);
+            xpyt::xerror error = extract_robot_error(e);
 
-            std::vector<std::string> traceback({error.m_ename + ": " + error.m_evalue});
             if (!silent)
             {
-                publish_execution_error(error.m_ename, error.m_evalue, traceback);
+                publish_execution_error(error.m_ename, error.m_evalue, error.m_traceback);
             }
 
             kernel_res["status"] = "error";
             kernel_res["ename"] = error.m_ename;
             kernel_res["evalue"] = error.m_evalue;
-            kernel_res["traceback"] = traceback;
+            kernel_res["traceback"] = error.m_traceback;
 
             return kernel_res;
         }
@@ -190,10 +192,53 @@ namespace xrob
                 display.attr("display")(widget);
             }
         }
-        // Otherwise publish tests report if there is one
-        else if (!result[1].is_none())
+        // Otherwise, publish tests report if there is one, stop the execution if tests failed
+        else
         {
-            publish_execution_result(execution_count, result[1], nl::json::object());
+            if (!result[1].is_none())
+            {
+                publish_execution_result(execution_count, result[1], nl::json::object());
+            }
+
+            bool failed = false;
+            xpyt::xerror error;
+            error.m_ename = "Task(s) failed";
+            error.m_evalue = "Task(s) failed";
+            error.m_traceback.push_back(first_error_delimiter(error.m_ename));
+            for (const py::handle& test: result[0].attr("suite").attr("tests"))
+            {
+                if ((py::hasattr(test, "failed") && xpyt::is_pyobject_true(test.attr("failed"))) ||
+                    (py::hasattr(test, "passed") && !xpyt::is_pyobject_true(test.attr("passed"))))
+                {
+                    failed = true;
+
+                    std::stringstream error_msg;
+                    error_msg << "Task " << blue_text(py::str(test.attr("name")).cast<std::string>())
+                        << " failed with: " << py::str(test.attr("message")).cast<std::string>();
+
+                    error.m_traceback.push_back(error_msg.str());
+                }
+            }
+
+            if (failed)
+            {
+                if (!silent)
+                {
+                    error.m_traceback.push_back(last_error_delimiter());
+                    publish_execution_error(error.m_ename, error.m_evalue, error.m_traceback);
+                }
+
+                // Cleanup
+                outputdir.attr("cleanup")();
+                progress_updater.attr("clear")();
+
+                kernel_res["status"] = "error";
+                kernel_res["ename"] = error.m_ename;
+                kernel_res["evalue"] = error.m_evalue;
+                kernel_res["traceback"] = error.m_traceback;
+
+                return kernel_res;
+            }
         }
 
         // Publish the latest test evaluation

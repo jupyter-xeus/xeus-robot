@@ -8,27 +8,28 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XPYT_TRACEBACK_HPP
-#define XPYT_TRACEBACK_HPP
+#ifndef XROB_TRACEBACK_HPP
+#define XROB_TRACEBACK_HPP
 
 #include <vector>
 #include <string>
 
 #include "pybind11/pybind11.h"
 
+#include "xeus-python/xtraceback.hpp"
+
 namespace py = pybind11;
 
 namespace xrob
 {
-    struct xerror
-    {
-        std::string m_ename;
-        std::string m_evalue;
-        std::vector<std::string> m_traceback;
-    };
+    std::string red_text(const std::string& text);
+    std::string green_text(const std::string& text);
+    std::string blue_text(const std::string& text);
 
-    void register_filename_mapping(const std::string& filename, int execution_count);
-    xerror extract_error(py::error_already_set& error);
+    std::string first_error_delimiter(const std::string& error_name);
+    std::string last_error_delimiter();
+
+    xpyt::xerror extract_robot_error(py::error_already_set& error);
 }
 
 #endif

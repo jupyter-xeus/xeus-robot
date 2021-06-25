@@ -118,6 +118,8 @@ set(XROBOT_SRC
     src/xdebugger.cpp
     src/xrobodebug_client.hpp
     src/xrobodebug_client.cpp
+    src/xtraceback.hpp
+    src/xtraceback.cpp
 )
 
 set(XROBOT_EXTENSION_SRC
@@ -131,6 +133,8 @@ set(XROBOT_EXTENSION_SRC
     src/xdebugger.cpp
     src/xrobodebug_client.hpp
     src/xrobodebug_client.cpp
+    src/xtraceback.hpp
+    src/xtraceback.cpp
 )
 
 # Targets and link - Macros
