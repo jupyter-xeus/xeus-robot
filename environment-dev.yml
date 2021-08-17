@@ -14,6 +14,6 @@ dependencies:
   - pybind11
   - pybind11_json
   - pip
-  - robotframework-interpreter>=0.7.0,<0.8
+  - robotframework-interpreter>=0.7.2,<0.8
   # Test dependencies
   - jupyter_kernel_test
