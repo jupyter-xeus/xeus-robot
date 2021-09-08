@@ -13,10 +13,11 @@
 #include <string>
 #include <utility>
 
+#include <signal.h>
+
 #ifdef __GNUC__
 #include <stdio.h>
 #include <execinfo.h>
-#include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
 #endif
@@ -48,6 +49,11 @@ void handler(int sig)
     exit(1);
 }
 #endif
+
+void stop_handler(int /*sig*/)
+{
+    exit(0);
+}
 
 namespace py = pybind11;
 
@@ -115,7 +121,11 @@ int main(int argc, char* argv[])
 #ifdef __GNUC__
     std::clog << "registering handler for SIGSEGV" << std::endl;
     signal(SIGSEGV, handler);
+
+    // Registering SIGINT and SIGKILL handlers
+    signal(SIGKILL, stop_handler);
 #endif
+    signal(SIGINT, stop_handler);
 
     // Setting Program Name
     static const std::string executable(xpyt::get_python_path());
