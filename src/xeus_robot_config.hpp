@@ -14,7 +14,7 @@
 // Project version
 #define XROB_VERSION_MAJOR 0
 #define XROB_VERSION_MINOR 3
-#define XROB_VERSION_PATCH 7
+#define XROB_VERSION_PATCH 8
 
 // Composing the version string from major, minor and patch
 #define XROB_CONCATENATE(A, B) XROB_CONCATENATE_IMPL(A, B)
