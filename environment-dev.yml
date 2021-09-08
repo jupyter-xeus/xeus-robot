@@ -17,3 +17,4 @@ dependencies:
   - robotframework-interpreter>=0.7.2,<0.8
   # Test dependencies
   - jupyter_kernel_test
+  - jupyter_client<7

@@ -32,7 +32,7 @@ install:
   # Build dependencies
   - conda install cmake -c conda-forge
   # Install test dependencies
-  - conda install jupyter_kernel_test -c conda-forge
+  - conda install jupyter_kernel_test "jupyter_client<7" -c conda-forge
   # Build and install xeus-robot
   - mkdir build
   - cd build
