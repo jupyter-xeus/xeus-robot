@@ -281,6 +281,9 @@ namespace xrob
         // Caching the input code
         linecache.attr("updatecache")(code, filename);
 
+        // Reset traceback
+        m_ipython_shell.attr("last_error") = py::none();
+
         // Execute it
         try
         {
@@ -300,7 +303,14 @@ namespace xrob
         }
         catch (py::error_already_set& e)
         {
-            xpyt::xerror error = xpyt::extract_error(e);
+            py::object traceback = e.trace() ? e.trace() : py::none();
+            m_ipython_shell.attr("showtraceback")(
+                py::make_tuple(e.type(), e.value(), traceback)
+            );
+
+            py::list pyerror = m_ipython_shell.attr("last_error");
+
+            xpyt::xerror error = xpyt::extract_error(pyerror);
 
             if (!silent)
             {
@@ -451,6 +461,10 @@ namespace xrob
         std::string port = content.value("port", "");
         std::string code = content.value("code", "");
         nl::json reply;
+
+        // Reset traceback
+        m_ipython_shell.attr("last_error") = py::none();
+
         try
         {
             try
@@ -478,7 +492,12 @@ namespace xrob
         }
         catch (py::error_already_set& e)
         {
-            xpyt::xerror error = xpyt::extract_error(e);
+            // This will grab the latest traceback and set shell.last_error
+            m_ipython_shell.attr("showtraceback")();
+
+            py::list pyerror = m_ipython_shell.attr("last_error");
+
+            xpyt::xerror error = xpyt::extract_error(pyerror);
 
             publish_execution_error(error.m_ename, error.m_evalue, error.m_traceback);
 
