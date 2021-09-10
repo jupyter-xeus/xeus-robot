@@ -11,6 +11,11 @@
 #ifndef XROB_INTERPRETER_HPP
 #define XROB_INTERPRETER_HPP
 
+#ifdef __GNUC__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wattributes"
+#endif
+
 #include <string>
 
 #include "nlohmann/json.hpp"
@@ -70,5 +75,9 @@ namespace xrob
         py::object m_debug_adapter;
     };
 }
+
+#ifdef __GNUC__
+    #pragma GCC diagnostic pop
+#endif
 
 #endif
