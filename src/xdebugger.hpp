@@ -18,6 +18,7 @@
 #include "zmq.hpp"
 #include "nlohmann/json.hpp"
 #include "xeus/xdebugger_base.hpp"
+#include "xeus/xeus_context.hpp"
 #include "xeus_robot_config.hpp"
 
 namespace xrob
@@ -54,7 +55,7 @@ namespace xrob
         nl::json m_debugger_config;
     };
 
-    std::unique_ptr<xeus::xdebugger> make_robot_debugger(zmq::context_t& context,
+    std::unique_ptr<xeus::xdebugger> make_robot_debugger(xeus::xcontext& context,
                                                          const xeus::xconfiguration& config,
                                                          const std::string& user_name,
                                                          const std::string& session_id,

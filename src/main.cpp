@@ -22,9 +22,10 @@
 #include <unistd.h>
 #endif
 
+#include "xeus/xeus_context.hpp"
 #include "xeus/xkernel.hpp"
 #include "xeus/xkernel_configuration.hpp"
-#include "xeus/xserver.hpp"
+#include "xeus/xserver_shell_main.hpp"
 
 #include "pybind11/embed.h"
 #include "pybind11/pybind11.h"
@@ -167,17 +168,20 @@ int main(int argc, char* argv[])
     nl::json debugger_config = nl::json::object();
     std::string connection_filename = extract_filename(argc, argv);
 
+    auto context = xeus::make_context<zmq::context_t>();
+    
     if (!connection_filename.empty())
     {
         xeus::xconfiguration config = xeus::load_configuration(connection_filename);
 
         xeus::xkernel kernel(config,
                              xeus::get_user_name(),
+                             std::move(context),
                              std::move(interpreter),
+                             xeus::make_xserver_shell_main,
                              std::move(hist),
                              xeus::make_console_logger(xeus::xlogger::msg_type,
                                                        xeus::make_file_logger(xeus::xlogger::content, "xeus.log")),
-                             xeus::make_xserver_shell_main,
                              xrob::make_robot_debugger,
                              debugger_config);
 
@@ -192,10 +196,11 @@ int main(int argc, char* argv[])
     else
     {
         xeus::xkernel kernel(xeus::get_user_name(),
+                             std::move(context),
                              std::move(interpreter),
+                             xeus::make_xserver_shell_main,
                              std::move(hist),
                              nullptr,
-                             xeus::make_xserver_shell_main,
                              xrob::make_robot_debugger,
                              debugger_config);
 
