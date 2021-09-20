@@ -2,7 +2,7 @@ name: xeus-robot
 channels:
   - conda-forge
 dependencies:
-  - xeus-robot=0.3.8
+  - xeus-robot=0.4.0
   - robotframework-seleniumlibrary
   - robotframework-jupyterlibrary
   - ipywidgets>=7.6
