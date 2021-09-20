@@ -5,8 +5,8 @@ dependencies:
   # Build dependencies
   - cmake
   # Host dependencies
-  - xeus=1.0.1
-  - xeus-python>=0.12.4,<0.13
+  - xeus=2.0.0
+  - xeus-python>=0.13.0,<0.14
   - robotframework-lsp>=0.14,<0.15
   - xtl
   - cppzmq
