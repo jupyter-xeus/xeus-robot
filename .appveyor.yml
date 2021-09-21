@@ -36,7 +36,7 @@ install:
   # Build and install xeus-robot
   - mkdir build
   - cd build
-  - cmake -G "NMake Makefiles" -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\Library -D XEXTRA_JUPYTER_DATA_DIR=%MINICONDA%\\share\\jupyter -D XROB_BUILD_TESTS=ON -D XEUS_PYTHONHOME_RELPATH=..\\ ..
+  - cmake -G "NMake Makefiles" -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\Library -D XEXTRA_JUPYTER_DATA_DIR=%MINICONDA%\\share\\jupyter -D XROB_BUILD_XROBOT_EXTENSION=ON -D XROB_BUILD_TESTS=ON -D XEUS_PYTHONHOME_RELPATH=..\\ ..
   - nmake
   - nmake install
   - jupyter kernelspec list
