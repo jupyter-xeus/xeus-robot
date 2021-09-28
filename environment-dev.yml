@@ -5,8 +5,7 @@ dependencies:
   # Build dependencies
   - cmake
   # Host dependencies
-  - xeus=2.0.0
-  - xeus-python>=0.13.0,<0.14
+  - xeus-python>=0.13.1,<0.14
   - robotframework-lsp>=0.14,<0.15
   - xtl
   - cppzmq
@@ -14,7 +13,6 @@ dependencies:
   - pybind11
   - pybind11_json
   - pip
-  - robotframework-interpreter>=0.7.2,<0.8
+  - robotframework-interpreter>=0.7.4,<0.8
   # Test dependencies
   - jupyter_kernel_test
-  - jupyter_client<7
