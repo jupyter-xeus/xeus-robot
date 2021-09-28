@@ -80,6 +80,9 @@ namespace xrob
         m_status_listener = robot_interpreter.attr("StatusEventListener")();
         m_listeners.append(m_status_listener);
 
+        m_listeners.append(robot_interpreter.attr("GlobalVarsListener")());
+
+        // Library listeners
         m_listeners.append(robot_interpreter.attr("SeleniumConnectionsListener")(m_drivers));
         m_listeners.append(robot_interpreter.attr("PlaywrightConnectionsListener")(m_drivers));
         m_listeners.append(robot_interpreter.attr("JupyterConnectionsListener")(m_drivers));
