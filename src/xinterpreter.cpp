@@ -38,6 +38,22 @@ using namespace pybind11::literals;
 #define PYTHON_MODULE_REGEX "^%%python module ([a-zA-Z_]+)"
 
 
+void safe_cleanup(py::object outputdir, py::object progress_updater, py::object logger) {
+    // Clean up the passed outputdir, log in cases of errors
+    try 
+    {
+        // Cleanup
+        outputdir.attr("cleanup")();
+        progress_updater.attr("clear")();
+    } catch (py::error_already_set& e) 
+    {
+        std::string message = "Got error while trying to clean up: " + std::string(pybind11::str(e.trace()));
+        logger.attr("warning")(message);
+    }
+}
+
+
+
 namespace xrob
 {
 
@@ -167,9 +183,8 @@ namespace xrob
         // Execution error (e.g. lib import failed)
         catch (py::error_already_set& e)
         {
-            // Cleanup
-            outputdir.attr("cleanup")();
-            progress_updater.attr("clear")();
+
+            safe_cleanup(outputdir, progress_updater, m_logger);
 
             xpyt::xerror error = extract_robot_error(e);
 
@@ -231,9 +246,7 @@ namespace xrob
                     publish_execution_error(error.m_ename, error.m_evalue, error.m_traceback);
                 }
 
-                // Cleanup
-                outputdir.attr("cleanup")();
-                progress_updater.attr("clear")();
+                safe_cleanup(outputdir, progress_updater, m_logger);
 
                 kernel_res["status"] = "error";
                 kernel_res["ename"] = error.m_ename;
@@ -251,9 +264,7 @@ namespace xrob
             display.attr("display")(last_test_evaluation, "raw"_a=true);
         }
 
-        // Cleanup
-        outputdir.attr("cleanup")();
-        progress_updater.attr("clear")();
+        safe_cleanup(outputdir, progress_updater, m_logger);
 
         kernel_res["status"] = "ok";
         kernel_res["user_expressions"] = nl::json::object();
