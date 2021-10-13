@@ -38,16 +38,17 @@ using namespace pybind11::literals;
 #define PYTHON_MODULE_REGEX "^%%python module ([a-zA-Z_]+)"
 
 
-void safe_cleanup(py::object outputdir, py::object progress_updater, py::object logger) {
+void safe_cleanup(const py::object& outputdir, const py::object& progress_updater, const py::object& logger) {
     // Clean up the passed outputdir, log in cases of errors
-    try 
+    try
     {
         // Cleanup
         outputdir.attr("cleanup")();
         progress_updater.attr("clear")();
-    } catch (py::error_already_set& e) 
+    }
+    catch (py::error_already_set& e)
     {
-        std::string message = "Got error while trying to clean up: " + std::string(pybind11::str(e.trace()));
+        std::string message = "Got error while trying to clean up: " + std::string(py::str(e.trace()));
         logger.attr("warning")(message);
     }
 }
@@ -183,7 +184,6 @@ namespace xrob
         // Execution error (e.g. lib import failed)
         catch (py::error_already_set& e)
         {
-
             safe_cleanup(outputdir, progress_updater, m_logger);
 
             xpyt::xerror error = extract_robot_error(e);
