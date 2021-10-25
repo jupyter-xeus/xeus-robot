@@ -6,7 +6,7 @@ dependencies:
   - cmake
   - cxx-compiler
   # Host dependencies
-  - xeus-python>=0.13.1,<0.14
+  - xeus-python>=0.13.5,<0.14
   - robotframework-lsp>=0.14,<0.15
   - xtl
   - cppzmq

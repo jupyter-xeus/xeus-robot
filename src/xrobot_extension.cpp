@@ -12,11 +12,21 @@
 #include <iostream>
 #include <string>
 #include <utility>
+#include <signal.h>
+
+#ifdef __GNUC__
+#include <stdio.h>
+#include <execinfo.h>
+#include <stdlib.h>
+#include <unistd.h>
+#endif
 
 #include "xeus/xeus_context.hpp"
 #include "xeus/xkernel.hpp"
 #include "xeus/xkernel_configuration.hpp"
 #include "xeus/xserver_shell_main.hpp"
+
+#include "xeus-python/xutils.hpp"
 
 #include "pybind11/pybind11.h"
 
@@ -25,8 +35,33 @@
 
 namespace py = pybind11;
 
-void launch(const std::string& connection_filename)
+void launch(const py::list args_list)
 {
+    // Extract cli args from Python object
+    int argc = args_list.size();
+    std::vector<char*> argv(argc);
+
+    for (int i = 0; i < argc; ++i)
+    {
+        argv[i] = (char*)PyUnicode_AsUTF8(args_list[i].ptr());
+    }
+
+    if (xpyt::should_print_version(argc, argv.data()))
+    {
+        std::clog << "xrobot " << XPYT_VERSION << std::endl;
+        return;
+    }
+
+    // Registering SIGSEGV handler
+#ifdef __GNUC__
+    std::clog << "registering handler for SIGSEGV" << std::endl;
+    signal(SIGSEGV, xpyt::sigsegv_handler);
+
+    // Registering SIGINT and SIGKILL handlers
+    signal(SIGKILL, xpyt::sigkill_handler);
+#endif
+    signal(SIGINT, xpyt::sigkill_handler);
+
     // Instantiating the xeus xinterpreter
     using interpreter_ptr = std::unique_ptr<xrob::interpreter>;
     interpreter_ptr interpreter = interpreter_ptr(new xrob::interpreter());
@@ -40,6 +75,8 @@ void launch(const std::string& connection_filename)
         "We recommend using a general-purpose package manager instead, such as Conda / Mamba.\n"
         << std::endl;
 #endif
+
+    std::string connection_filename = xpyt::extract_parameter("-f", argc, argv.data());
 
     auto context = xeus::make_context<zmq::context_t>();
 

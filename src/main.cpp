@@ -15,13 +15,6 @@
 
 #include <signal.h>
 
-#ifdef __GNUC__
-#include <stdio.h>
-#include <execinfo.h>
-#include <stdlib.h>
-#include <unistd.h>
-#endif
-
 #include "xeus/xeus_context.hpp"
 #include "xeus/xkernel.hpp"
 #include "xeus/xkernel_configuration.hpp"
@@ -31,78 +24,16 @@
 #include "pybind11/pybind11.h"
 
 #include "xeus-python/xpaths.hpp"
+#include "xeus-python/xutils.hpp"
 #include "xeus_robot_config.hpp"
 
 #include "xinterpreter.hpp"
 #include "xdebugger.hpp"
 
-#ifdef __GNUC__
-void handler(int sig)
-{
-    void* array[10];
-
-    // get void*'s for all entries on the stack
-    size_t size = backtrace(array, 10);
-
-    // print out all the frames to stderr
-    fprintf(stderr, "Error: signal %d:\n", sig);
-    backtrace_symbols_fd(array, size, STDERR_FILENO);
-    exit(1);
-}
-#endif
-
-void stop_handler(int /*sig*/)
-{
-    exit(0);
-}
-
-namespace py = pybind11;
-
-bool should_print_version(int argc, char* argv[])
-{
-    for (int i = 0; i < argc; ++i)
-    {
-        if (std::string(argv[i]) == "--version")
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-std::string extract_filename(int argc, char* argv[])
-{
-    std::string res = "";
-    for (int i = 0; i < argc; ++i)
-    {
-        if ((std::string(argv[i]) == "-f") && (i + 1 < argc))
-        {
-            res = argv[i + 1];
-            for (int j = i; j < argc - 2; ++j)
-            {
-                argv[j] = argv[j + 2];
-            }
-            argc -= 2;
-            break;
-        }
-    }
-    return res;
-}
-
-void print_pythonhome()
-{
-    std::setlocale(LC_ALL, "en_US.utf8");
-    wchar_t* ph = Py_GetPythonHome();
-
-    char mbstr[1024];
-    std::wcstombs(mbstr, ph, 1024);
-
-    std::clog << "PYTHONHOME set to " << mbstr << std::endl;
-}
 
 int main(int argc, char* argv[])
 {
-    if (should_print_version(argc, argv))
+    if (xpyt::should_print_version(argc, argv))
     {
         std::clog << "xrobot " << XROB_VERSION << std::endl;
         return 0;
@@ -121,12 +52,12 @@ int main(int argc, char* argv[])
     // Registering SIGSEGV handler
 #ifdef __GNUC__
     std::clog << "registering handler for SIGSEGV" << std::endl;
-    signal(SIGSEGV, handler);
+    signal(SIGSEGV, xpyt::sigsegv_handler);
 
     // Registering SIGINT and SIGKILL handlers
-    signal(SIGKILL, stop_handler);
+    signal(SIGKILL, xpyt::sigkill_handler);
 #endif
-    signal(SIGINT, stop_handler);
+    signal(SIGINT, xpyt::sigkill_handler);
 
     // Setting Program Name
     static const std::string executable(xpyt::get_python_path());
@@ -140,7 +71,7 @@ int main(int argc, char* argv[])
 
     // Setting PYTHONHOME
     xpyt::set_pythonhome();
-    print_pythonhome();
+    xpyt::print_pythonhome();
 
     // Instanciating the Python interpreter
     py::scoped_interpreter guard;
@@ -166,10 +97,11 @@ int main(int argc, char* argv[])
     history_manager_ptr hist = xeus::make_in_memory_history_manager();
 
     nl::json debugger_config = nl::json::object();
-    std::string connection_filename = extract_filename(argc, argv);
+
+    std::string connection_filename = xpyt::extract_parameter("-f", argc, argv);
 
     auto context = xeus::make_context<zmq::context_t>();
-    
+
     if (!connection_filename.empty())
     {
         xeus::xconfiguration config = xeus::load_configuration(connection_filename);
