@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+defaults:
+  run:
+    shell: bash -l {0}
+
+
+jobs:
+  test-unix:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-18.04, ubuntu-20.04, macos-10.15, macos-11]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get number of CPU cores
+        uses: SimenB/github-actions-cpu-cores@v1
+
+      - name: install mamba
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: environment-dev.yml
+          environment-name: xeus-robot
+
+      - name: Make build directory
+        run: mkdir build
+
+      - name: cmake configure
+        run: |
+          cmake .. \
+            -D CMAKE_PREFIX_PATH=$CONDA_PREFIX \
+            -D CMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
+            -D CMAKE_PREFIX_PATH=$CONDA_PREFIX \
+            -D CMAKE_INSTALL_LIBDIR=lib \
+            -D PYTHON_EXECUTABLE=`which python` \
+            -D CMAKE_C_COMPILER=$CC \
+            -D CMAKE_CXX_COMPILER=$CXX \
+            -D CMAKE_CXX_STANDARD=17 \
+            -D XROB_BUILD_XROBOT_EXTENSION=ON \
+            -D XROB_DOWNLOAD_GTEST=ON
+        working-directory: build
+
+      - name: Install
+        run: make -j ${{ steps.cpu-cores.outputs.count }} install
+        working-directory: build
+
+      - name: Test xeus-robot C++
+        run: ./test_xeus_robot
+        timeout-minutes: 4
+        working-directory: build/test
+
+      - name: Test xeus-robot Python
+        run: python test_xrobot_kernel.py -vvv
+        working-directory: test
+
+  test-win:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2016, windows-2019]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install mamba
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: environment-dev.yml
+          environment-name: xeus-robot
+
+      - name: micromamba shell hook
+        shell: powershell
+        run: |
+          micromamba shell hook -s cmd.exe -p C:\Users\runneradmin\micromamba
+          Get-Content -Path C:\Users\runneradmin\micromamba\condabin\mamba_hook.bat
+
+      - name: Make build directory
+        run: mkdir build
+
+      - name: cmake configure
+        shell: cmd
+        run: |
+          call C:\Users\runneradmin\micromamba\condabin\micromamba.bat activate xeus-robot
+          cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DXROB_DOWNLOAD_GTEST=ON -DCMAKE_INSTALL_PREFIX="%CONDA_PREFIX%\Library" -DXEXTRA_JUPYTER_DATA_DIR=%CONDA_PREFIX%\share\jupyter -DXROB_BUILD_XROBOT_EXTENSION=ON -DXEUS_PYTHONHOME_RELPATH=..\\ -Dgtest_force_shared_crt=ON -DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
+        working-directory: build
+
+      - name: build
+        shell: cmd
+        run: |
+          call C:\Users\runneradmin\micromamba\condabin\micromamba.bat activate xeus-robot
+          set CL=/MP
+          nmake install
+        working-directory: build
+
+      - name: Test xeus-robot C++
+        shell: cmd
+        run: |
+          call C:\Users\runneradmin\micromamba\condabin\micromamba.bat activate xeus-robot
+          test_xeus_robot
+        timeout-minutes: 4
+        working-directory: build/test
+
+      - name: Test xeus-robot Python
+        shell: cmd
+        run: |
+          call C:\Users\runneradmin\micromamba\condabin\micromamba.bat activate xeus-robot
+          python test_xrobot_kernel.py -vvv
+        working-directory: test

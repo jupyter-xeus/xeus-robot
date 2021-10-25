@@ -4,6 +4,7 @@ channels:
 dependencies:
   # Build dependencies
   - cmake
+  - cxx-compiler
   # Host dependencies
   - xeus-python>=0.13.1,<0.14
   - robotframework-lsp>=0.14,<0.15
