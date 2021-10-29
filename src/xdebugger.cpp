@@ -142,7 +142,7 @@ configure_logger("robot", 3, log_file)
 from robotframework_debug_adapter.run_robot__main__ import connect, _RobotTargetComm
 s = connect(int(robot_port))
 processor = _RobotTargetComm(s, debug=True)
-processor.start_communication_threads()
+processor.start_communication_threads(False)
         )";
         std::string init_listener_py = R"(
 from robotframework_debug_adapter.listeners import DebugListener, DebugListenerV2
