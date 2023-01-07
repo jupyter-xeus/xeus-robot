@@ -203,6 +203,9 @@ macro(xrob_set_kernel_options target_name)
     target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 endmacro()
 
+# required until https://github.com/jupyter-xeus/xeus-python/pull/566 is merged
+find_package(xeus-zmq)
+
 # xrobot
 # ======
 
