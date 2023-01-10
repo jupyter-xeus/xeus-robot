@@ -3,7 +3,8 @@ channels:
   - conda-forge
 dependencies:
   - xeus-robot=0.5.0
+  - python=3.9
   - robotframework-seleniumlibrary
   - robotframework-jupyterlibrary
   - ipywidgets>=8,<9
-  - jupyterlab=3
+  - jupyterlab>=3,<4
