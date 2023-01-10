@@ -61,7 +61,7 @@ OPTION(XROB_DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
 # Dependencies
 # ============
 
-set(xeus_python_REQUIRED_VERSION 0.13.5)
+set(xeus_python_REQUIRED_VERSION 0.15.2)
 set(pybind11_REQUIRED_VERSION 2.6.1)
 set(pybind11_json_REQUIRED_VERSION 0.2.8)
 
@@ -202,9 +202,6 @@ macro(xrob_set_kernel_options target_name)
     find_package(Threads) # TODO: add Threads as a dependence of xeus or xeus-static?
     target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 endmacro()
-
-# required until https://github.com/jupyter-xeus/xeus-python/pull/566 is merged
-find_package(xeus-zmq)
 
 # xrobot
 # ======
