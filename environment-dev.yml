@@ -7,7 +7,7 @@ dependencies:
   - cxx-compiler
   # Host dependencies
   - xeus-python>=0.15.2,<0.16
-  - robotframework-lsp>=0.43,<0.44
+  - robotframework-lsp>=1.7,<2
   - xtl
   - cppzmq
   - nlohmann_json
