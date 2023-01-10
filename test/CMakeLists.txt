@@ -19,9 +19,6 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     enable_testing()
 
     find_package(xeus-robot REQUIRED CONFIG)
-
-    # Required until https://github.com/jupyter-xeus/xeus-python/pull/566 is merged.
-    find_package(xeus-zmq)
 endif ()
 
 message(STATUS "Forcing tests build type to Release")
