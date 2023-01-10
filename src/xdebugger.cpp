@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <thread>
 
@@ -24,8 +25,9 @@
 #include "pybind11/stl.h"
 
 #include "xeus/xinterpreter.hpp"
-#include "xeus/xmiddleware.hpp"
 #include "xeus/xsystem.hpp"
+
+#include "xeus-zmq/xmiddleware.hpp"
 
 #include "xdebugger.hpp"
 #include "xrobodebug_client.hpp"

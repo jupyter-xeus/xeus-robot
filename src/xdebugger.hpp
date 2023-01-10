@@ -16,10 +16,13 @@
 #include <set>
 
 #include "zmq.hpp"
+
 #include "nlohmann/json.hpp"
-#include "xeus/xdebugger_base.hpp"
-#include "xeus/xeus_context.hpp"
+
 #include "xeus_robot_config.hpp"
+#include "xeus/xeus_context.hpp"
+
+#include "xeus-zmq/xdebugger_base.hpp"
 
 namespace xrob
 {

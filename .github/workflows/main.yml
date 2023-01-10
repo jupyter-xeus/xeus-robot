@@ -74,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2016, windows-2019]
+        os: [windows-2019]
 
     steps:
       - uses: actions/checkout@v2
@@ -88,8 +88,7 @@ jobs:
       - name: micromamba shell hook
         shell: powershell
         run: |
-          micromamba shell hook -s cmd.exe -p C:\Users\runneradmin\micromamba
-          Get-Content -Path C:\Users\runneradmin\micromamba\condabin\mamba_hook.bat
+          micromamba shell hook -s cmd.exe -p C:\Users\runneradmin\micromamba-root
 
       - name: Make build directory
         run: mkdir build
@@ -97,14 +96,14 @@ jobs:
       - name: cmake configure
         shell: cmd
         run: |
-          call C:\Users\runneradmin\micromamba\condabin\micromamba.bat activate xeus-robot
+          call C:\Users\runneradmin\micromamba-root\condabin\micromamba.bat activate xeus-robot
           cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DXROB_DOWNLOAD_GTEST=ON -DCMAKE_INSTALL_PREFIX="%CONDA_PREFIX%\Library" -DXEXTRA_JUPYTER_DATA_DIR=%CONDA_PREFIX%\share\jupyter -DXROB_BUILD_XROBOT_EXTENSION=ON -DXEUS_PYTHONHOME_RELPATH=..\\ -Dgtest_force_shared_crt=ON -DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
         working-directory: build
 
       - name: build
         shell: cmd
         run: |
-          call C:\Users\runneradmin\micromamba\condabin\micromamba.bat activate xeus-robot
+          call C:\Users\runneradmin\micromamba-root\condabin\micromamba.bat activate xeus-robot
           set CL=/MP
           nmake install
         working-directory: build
@@ -112,7 +111,7 @@ jobs:
       - name: Test xeus-robot C++
         shell: cmd
         run: |
-          call C:\Users\runneradmin\micromamba\condabin\micromamba.bat activate xeus-robot
+          call C:\Users\runneradmin\micromamba-root\condabin\micromamba.bat activate xeus-robot
           test_xeus_robot
         timeout-minutes: 4
         working-directory: build/test
@@ -120,6 +119,6 @@ jobs:
       - name: Test xeus-robot Python
         shell: cmd
         run: |
-          call C:\Users\runneradmin\micromamba\condabin\micromamba.bat activate xeus-robot
+          call C:\Users\runneradmin\micromamba-root\condabin\micromamba.bat activate xeus-robot
           python test_xrobot_kernel.py -vvv
         working-directory: test

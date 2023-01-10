@@ -14,9 +14,12 @@
 #include <string>
 
 #include "zmq.hpp"
+
 #include "nlohmann/json.hpp"
-#include "xeus/xauthentication.hpp"
+
 #include "xeus/xkernel_configuration.hpp"
+
+#include "xeus-zmq/xauthentication.hpp"
 
 // Base class for clients, provides an API to 
 // send and receive messages, but nothing more ;)

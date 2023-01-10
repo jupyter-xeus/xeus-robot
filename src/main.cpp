@@ -18,7 +18,8 @@
 #include "xeus/xeus_context.hpp"
 #include "xeus/xkernel.hpp"
 #include "xeus/xkernel_configuration.hpp"
-#include "xeus/xserver_shell_main.hpp"
+
+#include "xeus-zmq/xserver_shell_main.hpp"
 
 #include "pybind11/embed.h"
 #include "pybind11/pybind11.h"
