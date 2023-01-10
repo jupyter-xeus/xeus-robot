@@ -374,6 +374,7 @@ namespace xrob
             code, cursor_pos, m_test_suite, m_keywords_listener, m_python_modules, m_drivers, "logger"_a=m_logger
         );
         xrobot_res["status"] = "ok";
+        xrobot_res["metadata"] = nl::json::object();
         return xrobot_res;
     }
 
