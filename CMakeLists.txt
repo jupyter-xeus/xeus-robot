@@ -33,7 +33,7 @@ message(STATUS "Building xeus-robot v${${PROJECT_NAME}_VERSION}")
 include(GNUInstallDirs)
 
 if (NOT DEFINED XROBOT_KERNELSPEC_PATH)
-    set(XROBOT_KERNELSPEC_PATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/")
+    set(XROBOT_KERNELSPEC_PATH "${CMAKE_INSTALL_FULL_BINDIR}/")
 endif ()
 
 configure_file (
